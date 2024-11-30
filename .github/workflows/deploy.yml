@@ -52,8 +52,8 @@ jobs:
             # 复制环境变量文件
             cp .env.production .env
             # 安装依赖并构建
-            npm install --production
+            yarn install
             npx prisma generate
-            npm run build
+            yarn run build
             # 重启应用
             pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
