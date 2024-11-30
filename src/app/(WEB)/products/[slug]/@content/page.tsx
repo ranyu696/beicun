@@ -4,9 +4,11 @@ import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
-export default async function ContentPage({ params }: { params: { slug: string } }) {
+type Params = Promise<{ slug: string }>
+export default async function ContentPage({ params }: { params: Params }) {
+  const { slug } = await params
   const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     select: {
       description: true,
       ProductImage: {

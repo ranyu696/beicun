@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/ui/avatar"
+
 import { Badge } from "@/components/ui/badge"
 import {
   Table,

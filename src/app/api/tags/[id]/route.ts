@@ -7,10 +7,12 @@ const tagSchema = z.object({
   name: z.string().min(1, '请输入标签名称'),
 })
 
+type Params = Promise<{ id: string }>
+
 // PUT 更新标签
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -20,13 +22,13 @@ export async function PUT(
 
     const json = await request.json()
     const { name } = tagSchema.parse(json)
-
+    const { id } = await params
     // 检查新名称是否与其他标签重复
     const existingTag = await prisma.tag.findFirst({
       where: {
         name,
         NOT: {
-          id: params.id
+          id
         }
       }
     })
@@ -39,7 +41,7 @@ export async function PUT(
     }
 
     const tag = await prisma.tag.update({
-      where: { id: params.id },
+      where: { id },
       data: { name }
     })
 
@@ -62,17 +64,17 @@ export async function PUT(
 // DELETE 删除标签
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
-
+    const { id } = await params
     // 检查标签是否有关联的产品
     const tag = await prisma.tag.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         _count: {
           select: {
@@ -97,7 +99,7 @@ export async function DELETE(
     }
 
     await prisma.tag.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })

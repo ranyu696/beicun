@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 export default {
     darkMode: ["class"],
@@ -87,8 +89,98 @@ export default {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+  		typography: {
+  			DEFAULT: {
+  				css: {
+  					maxWidth: 'none',
+  					color: 'hsl(var(--foreground))',
+  					a: {
+  						color: 'hsl(var(--primary))',
+  						textDecoration: 'none',
+  						fontWeight: '500',
+  						'&:hover': {
+  							color: 'hsl(var(--primary))',
+  							textDecoration: 'underline',
+  						},
+  					},
+  					h1: {
+  						color: 'hsl(var(--foreground))',
+  					},
+  					h2: {
+  						color: 'hsl(var(--foreground))',
+  					},
+  					h3: {
+  						color: 'hsl(var(--foreground))',
+  					},
+  					h4: {
+  						color: 'hsl(var(--foreground))',
+  					},
+  					p: {
+  						color: 'hsl(var(--foreground))',
+  					},
+  					li: {
+  						color: 'hsl(var(--foreground))',
+  					},
+  					blockquote: {
+  						color: 'hsl(var(--muted-foreground))',
+  						borderLeftColor: 'hsl(var(--border))',
+  					},
+  					code: {
+  						color: 'hsl(var(--foreground))',
+  						backgroundColor: 'hsl(var(--muted))',
+  						borderRadius: '0.25rem',
+  						padding: '0.25rem',
+  					},
+  					pre: {
+  						backgroundColor: 'hsl(var(--muted))',
+  						code: {
+  							backgroundColor: 'transparent',
+  							padding: '0',
+  						},
+  					},
+  					hr: {
+  						borderColor: 'hsl(var(--border))',
+  					},
+  					strong: {
+  						color: 'hsl(var(--foreground))',
+  					},
+  					thead: {
+  						borderBottomColor: 'hsl(var(--border))',
+  						th: {
+  							color: 'hsl(var(--foreground))',
+  						},
+  					},
+  					tbody: {
+  						tr: {
+  							borderBottomColor: 'hsl(var(--border))',
+  						},
+  						td: {
+  							color: 'hsl(var(--foreground))',
+  						},
+  					},
+  				},
+  			},
+  			dark: {
+  				css: {
+  					color: 'hsl(var(--foreground))',
+  					a: {
+  						color: 'hsl(var(--primary))',
+  					},
+  					blockquote: {
+  						color: 'hsl(var(--muted-foreground))',
+  						borderLeftColor: 'hsl(var(--border))',
+  					},
+  					code: {
+  						backgroundColor: 'hsl(var(--muted))',
+  					},
+  					pre: {
+  						backgroundColor: 'hsl(var(--muted))',
+  					},
+  				},
+  			},
+  		},
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate, typography],
 } satisfies Config;

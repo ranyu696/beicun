@@ -22,9 +22,11 @@ const levelMap = {
   LOOSE: '松'
 }
 
-export default async function SpecsPage({ params }: { params: { slug: string } }) {
+type Params = Promise<{ slug: string }>
+export default async function SpecsPage({ params }: { params: Params }) {
+  const {slug }= await params
   const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       materialType: true,
       channelType: true,

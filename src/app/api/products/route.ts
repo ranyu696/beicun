@@ -13,6 +13,7 @@ const productSchema = z.object({
   productTypeId: z.string().min(1, '请选择产品类型'),
   channelTypeId: z.string().min(1, '请选择通道类型'),
   materialTypeId: z.string().min(1, '请选择材料类型'),
+  utilityTypeId: z.string().min(1, '请选择器具类型'),
   description: z.string().optional(),
   taobaoUrl: z.string().url('请输入有效的淘宝链接').optional(),
   
@@ -33,6 +34,7 @@ const productSchema = z.object({
   tightness: z.enum(['TIGHT', 'MEDIUM', 'LOOSE']),
   smell: z.enum(['HIGH', 'MEDIUM', 'LOW']),
   oiliness: z.enum(['HIGH', 'MEDIUM', 'LOW']),
+  durability: z.enum(['HIGH', 'MEDIUM', 'LOW']),
   
   // 媒体资源
   mainImage: z.string().min(1, '请上传产品主图'),
@@ -148,6 +150,7 @@ export async function POST(request: Request) {
         productTypeId: body.productTypeId,
         channelTypeId: body.channelTypeId,
         materialTypeId: body.materialTypeId,
+        utilityTypeId: body.utilityTypeId,
         description: body.description,
         taobaoUrl: body.taobaoUrl,
         registrationDate: body.registrationDate,
@@ -164,6 +167,7 @@ export async function POST(request: Request) {
         tightness: body.tightness,
         smell: body.smell,
         oiliness: body.oiliness,
+        durability: body.durability,
         mainImage: body.mainImage,
         salesImage: body.salesImage,
         videoUrl: body.videoUrl,
@@ -189,6 +193,7 @@ export async function POST(request: Request) {
         productType: true,
         channelType: true,
         materialType: true,
+        utilityType: true,
         ProductImage: true,
         tags: {
           include: {

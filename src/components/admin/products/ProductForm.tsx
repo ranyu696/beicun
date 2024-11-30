@@ -67,6 +67,7 @@ const productSchema = z.object({
   tightness: z.enum(['TIGHT', 'MEDIUM', 'LOOSE']),
   smell: z.enum(['HIGH', 'MEDIUM', 'LOW']),
   oiliness: z.enum(['HIGH', 'MEDIUM', 'LOW']),
+  durability: z.enum(['HIGH', 'MEDIUM', 'LOW']),
   
   // 媒体资源
   mainImage: z.string().min(1, '请上传产品主图'),
@@ -79,7 +80,8 @@ const productSchema = z.object({
   })).default([]),
   
   // 标签
-  tags: z.array(z.string()).default([])
+  tags: z.array(z.string()).default([]),
+  utilityTypeId: z.string().min(1, '请选择器具类型'),
 })
 
 type ProductFormValues = z.infer<typeof productSchema>
@@ -94,6 +96,7 @@ interface ProductModel {
   productTypeId: string
   channelTypeId: string
   materialTypeId: string
+  utilityTypeId: string
   description?: string
   taobaoUrl?: string
   registrationDate: Date
@@ -110,6 +113,7 @@ interface ProductModel {
   tightness: 'TIGHT' | 'MEDIUM' | 'LOOSE'
   smell: 'HIGH' | 'MEDIUM' | 'LOW'
   oiliness: 'HIGH' | 'MEDIUM' | 'LOW'
+  durability: 'HIGH' | 'MEDIUM' | 'LOW'
   mainImage: string
   salesImage: string
   videoUrl?: string
@@ -192,6 +196,7 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
       price: initialData?.price || 0,
       brandId: initialData?.brandId || '',
       productTypeId: initialData?.productTypeId || '',
+      utilityTypeId: initialData?.utilityTypeId || '',
       channelTypeId: initialData?.channelTypeId || '',
       materialTypeId: initialData?.materialTypeId || '',
       description: initialData?.description || '',
@@ -210,6 +215,7 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
       tightness: initialData?.tightness || 'MEDIUM',
       smell: initialData?.smell || 'MEDIUM',
       oiliness: initialData?.oiliness || 'MEDIUM',
+      durability: initialData?.durability || 'MEDIUM',
       mainImage: initialData?.mainImage || '',
       salesImage: initialData?.salesImage || '',
       videoUrl: initialData?.videoUrl || '',
@@ -741,7 +747,7 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
               name="materialTypeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>材料型</FormLabel>
+                  <FormLabel>材料</FormLabel>
                   <Select 
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -987,7 +993,7 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择刺激度" />
+                          <SelectValue placeholder="选择刺激" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -1106,6 +1112,33 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="durability"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>耐用度</FormLabel>
+                      <Select 
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择耐用度" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="HIGH">高</SelectItem>
+                        <SelectItem value="MEDIUM">一般</SelectItem>
+                        <SelectItem value="LOW">低</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
             </div>
           </TabsContent>
           

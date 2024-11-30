@@ -1,4 +1,10 @@
 import { LoginForm } from "@/components/auth/LoginForm"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: '登录 - 杯村测评',
+  description: '登录杯村测评',
+}
 
 export default function LoginPage() {
   return (

@@ -23,10 +23,12 @@ const reviewSchema = z.object({
   conclusion: z.string().min(1, '请填写总结'),
 })
 
+type Params = Promise<{ id: string }>
+
 // GET 获取单个测评
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -34,8 +36,10 @@ export async function GET(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
+
     const review = await prisma.review.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         product: {
           select: {
@@ -91,7 +95,7 @@ export async function GET(
 // PATCH 更新测评状态
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -109,9 +113,10 @@ export async function PATCH(
         publishedAt: new Date()
       })
     }
-
+   
+    const { id } = await params
     const review = await prisma.review.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData
     })
 
@@ -134,7 +139,7 @@ export async function PATCH(
 // PUT 更新测评
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -144,9 +149,10 @@ export async function PUT(
 
     const json = await request.json()
     const body = reviewSchema.parse(json)
-
+    
+    const { id } = await params
     const review = await prisma.review.update({
-      where: { id: params.id },
+      where: { id },
       data: body
     })
 
@@ -169,7 +175,7 @@ export async function PUT(
 // DELETE 删除测评
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -177,13 +183,15 @@ export async function DELETE(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
+
     // 删除测评及其关联的评论
     await prisma.$transaction([
       prisma.comment.deleteMany({
-        where: { reviewId: params.id }
+        where: { reviewId: id }
       }),
       prisma.review.delete({
-        where: { id: params.id }
+        where: { id }
       })
     ])
 

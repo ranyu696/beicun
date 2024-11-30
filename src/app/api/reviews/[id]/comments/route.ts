@@ -7,10 +7,12 @@ const commentSchema = z.object({
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED'])
 })
 
+type Params = Promise<{ id: string,}>
+
 // PATCH 更新评论状态
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string, commentId: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -20,9 +22,10 @@ export async function PATCH(
 
     const json = await request.json()
     const { status } = commentSchema.parse(json)
-
+    const { id } = await params
+   
     const comment = await prisma.comment.update({
-      where: { id: params.commentId },
+      where: { id },
       data: { status }
     })
 
@@ -45,7 +48,7 @@ export async function PATCH(
 // DELETE 删除评论
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string, commentId: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -53,8 +56,10 @@ export async function DELETE(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
+
     await prisma.comment.delete({
-      where: { id: params.commentId }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })

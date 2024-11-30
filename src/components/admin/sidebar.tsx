@@ -47,7 +47,8 @@ const sidebarItems = [
     submenu: [
       { title: '产品类型', href: '/admin/categories/product-types' },
       { title: '通道类型', href: '/admin/categories/channel-types' },
-      { title: '材料类型', href: '/admin/categories/material-types' }
+      { title: '材料类型', href: '/admin/categories/material-types' },
+      { title: '器具类型', href: '/admin/categories/utility-types' }
     ]
   },
   {

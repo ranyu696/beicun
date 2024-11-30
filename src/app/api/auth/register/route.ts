@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     })
 
     // 发送验证邮件
-    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`
+    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-request?token=${verificationToken}`
     await sendVerificationEmail(email, verificationUrl)
 
     return NextResponse.json({

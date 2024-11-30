@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         }
       }
     })
-    console.log('Found product:', product) // 添加日志
+    console.log('Found product:', product) // 添���日志
     if (!product) {
       return NextResponse.json(
         { error: "产品不存在" },

@@ -3,15 +3,13 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-interface PageProps {
-  params: {
-    id: string
-  }
-}
+type Params = Promise<{ id: string }>
 
-export default async function ProductPage({ params }: PageProps) {
+export default async function ProductPage({ params }: { params: Params }) {
+  const { id } = await params
+
   const product = await prisma.product.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       brand: true,
       productType: true,

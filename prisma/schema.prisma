@@ -15,7 +15,7 @@ model User {
   name          String?         // 用户名
   email         String          @unique // 邮箱(唯一)
   password      String?         // 密码
-  emailVerified DateTime?       // 邮箱验证时间
+  emailVerified Boolean           @default(false)// 邮箱验证时间
   verificationToken String?   @unique // 邮箱验证令牌
   resetToken        String?   @unique // 重置密码令牌
   resetTokenExpiry  DateTime? // 重置密码令牌过期时间
@@ -126,13 +126,19 @@ enum TightnessLevel {
   MEDIUM       // 一般
   LOOSE        // 松
 }
-
+//耐用枚举
+enum DurabilityLevel {
+  HIGH         // 高
+  MEDIUM       // 一般
+  LOW          // 低
+}
 // 气味度/出油量枚举
 enum Level {
   HIGH         // 大
   MEDIUM       // 一般
   LOW          // 小
 }
+
 
 model Product {
   id              String          @id @default(cuid())
@@ -153,6 +159,7 @@ model Product {
   tightness       TightnessLevel  // 紧致度
   smell           Level           // 气味度
   oiliness        Level           // 出油量
+  durability      DurabilityLevel // 耐用度
   description     String?         @db.Text // 其他说明
   taobaoUrl       String?         // 淘宝链接
 
@@ -174,6 +181,9 @@ model Product {
 
   // 关联
     // 分类关联（改为引用分类表）
+  utilityTypeId   String
+  utilityType     UtilityType     @relation(fields: [utilityTypeId], references: [id])
+  
   productTypeId   String
   productType     ProductType     @relation(fields: [productTypeId], references: [id])
   
@@ -192,21 +202,13 @@ model Product {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
+  viewCount       Int             @default(0)
+
+
   @@map("products")
 }
 
-model ProductImage {
-  id          String   @id @default(cuid())
-  productId   String
-  imageUrl    String   // 图片URL
-  description String?  @db.Text // 图片说明
-  sortOrder   Int      // 排序顺序
-  product     Product  @relation(fields: [productId], references: [id])
-  createdAt   DateTime @default(now())
-
-  @@map("product_images")
-}
-
+// 修改 ProductRating 模型
 model ProductRating {
   id          String   @id @default(cuid())
   productId   String
@@ -220,82 +222,29 @@ model ProductRating {
   @@map("product_ratings")
 }
 
-model Brand {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  logo        String?
-  description String?   @db.Text
-  products    Product[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  website     String?
-  sortOrder   Int       @default(0)
-  isActive    Boolean   @default(true)
-
-  @@map("brands")
-}
-// 产品类型分类表
-model ProductType {
-  id          String    @id @default(cuid())
-  name        String    @unique // 类型名称
-  description String?   @db.Text // 类型描述
-  products    Product[] // 关联产品
-  sortOrder   Int       @default(0) // 排序顺序
-  isActive    Boolean   @default(true) // 是否启用
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@map("product_types")
-}
-
-// 通道类型分类表
-model ChannelType {
-  id          String    @id @default(cuid())
-  name        String    @unique // 类型名称
-  description String?   @db.Text // 类型描述
-  products    Product[] // 关联产品
-  sortOrder   Int       @default(0) // 排序顺序
-  isActive    Boolean   @default(true) // 是否启用
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@map("channel_types")
-}
-
-// 材料类型分类表
-model MaterialType {
-  id          String    @id @default(cuid())
-  name        String    @unique // 类型名称
-  description String?   @db.Text // 类型描述
-  products    Product[] // 关联产品
-  sortOrder   Int       @default(0) // 排序顺序
-  isActive    Boolean   @default(true) // 是否启用
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@map("material_types")
-}
+// 修改 Review 模型
 model Review {
-  id              String      @id @default(cuid())
-  productId       String
-  userId          String
+  id              String         @id @default(cuid())
   title           String
-  status          ReviewStatus @default(PENDING)
+  status          ReviewStatus   @default(PENDING) // 审核状态
   
-  // 测评内容模块
-  unboxing        String      @db.Text  // 开箱体验
-  unboxingImages  String[]    // 开箱图片
-  experience      String      @db.Text  // 使用感受
-  maintenance     String      @db.Text  // 清洁与维护
+  // 关联
+  productId       String
+  product         Product        @relation(fields: [productId], references: [id])//关联产品
+
+  userId          String
+  author          User           @relation(fields: [userId], references: [id])//关联用户
+  
+  // 测评内容模块 - 使用富文本内容
+  unboxing        String      @db.Text  // 开箱体验(富文本)
+  experience      String      @db.Text  // 使用感受(富文本)
+  maintenance     String      @db.Text  // 清洁与维护(富文本)
   pros            String[]    // 优点列表
   cons            String[]    // 缺点列表
-  conclusion      String      @db.Text  // 总结
+  conclusion      String      @db.Text  // 总结(富文本)
 
-  // 关联
-  product         Product     @relation(fields: [productId], references: [id])
-  author          User        @relation(fields: [userId], references: [id])
+  // 其他字段
   comments        Comment[]   // 评论
-
   views           Int         @default(0)
   isRecommended   Boolean     @default(false)
   publishedAt     DateTime?
@@ -341,6 +290,20 @@ model ProductTag {
   @@id([productId, tagId])
   @@map("product_tags")
 }
+// 器具类型模型
+model UtilityType {
+  id          String    @id @default(cuid())
+  name        String    @unique    // 器具类型名称,如:茶具、酒具、餐具等
+  description String?   @db.Text   // 类型描述
+  icon        String?   // 类型图标
+  products    Product[] // 关联产品
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("utility_types")
+}
 
 enum UserRole {
   USER   // 用户
@@ -358,4 +321,76 @@ enum CommentStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+// 产品图片模型
+model ProductImage {
+  id          String   @id @default(cuid())
+  productId   String
+  imageUrl    String   // 图片URL
+  description String?  @db.Text // 图片说明
+  sortOrder   Int      // 排序顺序
+  product     Product  @relation(fields: [productId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@map("product_images")
+}
+//产品类型模型
+model ProductType {
+  id          String    @id @default(cuid())
+  name        String    @unique    // 产品类型名称
+  description String?   @db.Text   // 类型描述
+  icon        String?   // 类型图标
+  products    Product[] // 关联产品
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("product_types")
+}
+
+
+// 通道类型模型
+model ChannelType {
+  id          String    @id @default(cuid())
+  name        String    @unique // 类型名称
+  description String?   @db.Text // 类型描述
+  products    Product[] // 关联产品
+  sortOrder   Int       @default(0) // 排序顺序
+  isActive    Boolean   @default(true) // 是否启用
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("channel_types")
+}
+
+// 品牌模型
+model Brand {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  logo        String?
+  description String?   @db.Text
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  website     String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+
+  @@map("brands")
+}
+
+// 材料类型模型
+model MaterialType {
+  id          String    @id @default(cuid())
+  name        String    @unique // 类型名称
+  description String?   @db.Text // 类型描述
+  products    Product[] // 关联产品
+  sortOrder   Int       @default(0) // 排序顺序
+  isActive    Boolean   @default(true) // 是否启用
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("material_types")
 }

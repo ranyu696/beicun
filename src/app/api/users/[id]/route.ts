@@ -7,10 +7,11 @@ const roleSchema = z.object({
   role: z.enum(['USER', 'EDITOR', 'ADMIN'])
 })
 
+type Params = Promise<{ id: string }>
 // GET 获取单个用户
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -18,8 +19,10 @@ export async function GET(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
+
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: {
         id: true,
         name: true,
@@ -96,7 +99,7 @@ export async function GET(
 // PATCH 更新用户角色
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -104,8 +107,10 @@ export async function PATCH(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
+
     // 不允许修改自己的角色
-    if (session.user.id === params.id) {
+    if (session.user.id === id) {
       return NextResponse.json(
         { error: "不能修改自己的角色" },
         { status: 400 }
@@ -116,7 +121,7 @@ export async function PATCH(
     const { role } = roleSchema.parse(json)
 
     const user = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: { role }
     })
 
@@ -139,7 +144,7 @@ export async function PATCH(
 // DELETE 删除用户
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -147,8 +152,10 @@ export async function DELETE(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
+
     // 不允许删除自己
-    if (session.user.id === params.id) {
+    if (session.user.id === id) {
       return NextResponse.json(
         { error: "不能删除自己的账号" },
         { status: 400 }
@@ -159,19 +166,19 @@ export async function DELETE(
     await prisma.$transaction([
       // 删除用户的评分
       prisma.productRating.deleteMany({
-        where: { userId: params.id }
+        where: { userId: id }
       }),
       // 删除用户的评论
       prisma.comment.deleteMany({
-        where: { userId: params.id }
+        where: { userId: id }
       }),
       // 删除用户的测评
       prisma.review.deleteMany({
-        where: { userId: params.id }
+        where: { userId: id }
       }),
       // 最后删除用户
       prisma.user.delete({
-        where: { id: params.id }
+        where: { id }
       })
     ])
 

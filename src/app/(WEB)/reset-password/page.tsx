@@ -3,12 +3,13 @@ import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 
+type SearchParams = Promise<{ token: string }>
 export default async function ResetPasswordPage({
   searchParams
 }: {
-  searchParams: { token: string }
+  searchParams: SearchParams
 }) {
-  const { token } = searchParams
+  const { token } = await searchParams
 
   if (!token) {
     redirect("/login")

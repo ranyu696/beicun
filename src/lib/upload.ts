@@ -1,48 +1,49 @@
-
-
-// 定义上传目录结构
 export const UPLOAD_DIRS = {
-    // 品牌相关
-    BRAND: {
-      LOGOS: 'brands/logos',          // 品牌logo
-    },
-    
-    // 产品相关
-    PRODUCT: {
-      BASE: 'products',
-      MAIN: 'main',
-      SALES: 'sales',
-      DETAILS: 'details',
-      GALLERY: 'gallery',
-      VIDEOS: 'videos'
-    },
-    
-    // 测评相关
-    REVIEW: {
-      UNBOXING: 'reviews/unboxing',   // 开箱图片
-      CONTENT: 'reviews/content',     // 测评内容图片
-    },
-    
-    // 用户相关
-    USER: {
-      AVATARS: 'users/avatars',       // 用户头像
-    }
-  } as const
-  
-  // 生成文件路径的工具函数
-  export function generateUploadPath(
-    baseDir: string,
-    fileName: string,
-    productId?: string
-  ): string {
-    // 生成唯一文件名
-    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}`
-    const ext = fileName.split('.').pop()
-    
-    // 构建路径
-    const parts = [baseDir]
-    if (productId) parts.push(productId)
-    parts.push(`${uniqueName}.${ext}`)
-    
-    return parts.join('/')
+  EDITOR: 'editor',
+  BRAND: {
+    LOGOS: 'brands/logos'
+  },
+  UTILITY_TYPE: {
+    ICONS: 'utility-types/icons'
+  },
+  PRODUCT: {
+    BASE: 'products',
+    MAIN: 'main',
+    SALES: 'sales',
+    DETAILS: 'details',
+    GALLERY: 'gallery',
+    VIDEOS: 'videos'
+  },
+  REVIEW: {
+    UNBOXING: 'reviews/unboxing',
+    CONTENT: 'reviews/content'
+  },
+  USER: {
+    AVATARS: 'users/avatars'
   }
+} as const
+
+export function generateUploadPath(baseDir: string, fileName: string): string {
+  const timestamp = Date.now()
+  const random = Math.random().toString(36).substring(2, 8)
+  const ext = fileName.split('.').pop()
+  return `${baseDir}/${timestamp}-${random}.${ext}`
+}
+
+export function getFileType(fileName: string): string {
+  const ext = fileName.split('.').pop()?.toLowerCase() || ''
+  const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+  if (imageTypes.includes(ext)) return 'image'
+  const videoTypes = ['mp4', 'webm', 'ogg']
+  if (videoTypes.includes(ext)) return 'video'
+  return 'other'
+}
+
+export function validateFileSize(file: File, maxSize: number): boolean {
+  return file.size <= maxSize
+}
+
+export function validateFileType(fileName: string, allowedTypes: string[]): boolean {
+  const ext = fileName.split('.').pop()?.toLowerCase() || ''
+  return allowedTypes.includes(ext)
+}

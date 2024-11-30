@@ -60,9 +60,13 @@ async function getProductRatings(slug: string) {
   }
 }
 
-export default async function RatingsPage({ params }: { params: { slug: string } }) {
+
+type Params = Promise<{ slug: string }>
+
+export default async function RatingsPage({ params }: { params: Params }) {
+  const {slug }= await params
   const session = await auth()
-  const data = await getProductRatings(params.slug)
+  const data = await getProductRatings(slug)
   
   if (!data) return null
 

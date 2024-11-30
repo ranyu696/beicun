@@ -9,22 +9,34 @@ export const metadata: Metadata = {
   description: "编辑产品测评",
 }
 
-interface EditReviewPageProps {
-  params: {
-    id: string
-  }
-}
+type Params = Promise<{ id: string }>
 
-export default async function EditReviewPage({ params }: EditReviewPageProps) {
+export default async function EditReviewPage({ params }: { params: Params }) {
   const session = await auth()
   if (!session || session.user.role !== 'ADMIN') {
     redirect('/auth/signin')
   }
 
   // 获取测评数据
+  const { id } = await params
   const review = await prisma.review.findUnique({
     where: {
-      id: params.id
+      id
+    },
+    select: {
+      id: true,
+      title: true,
+      productId: true,
+      unboxing: true,
+      experience: true,
+      maintenance: true,
+      pros: true,
+      cons: true,
+      conclusion: true,
+      status: true,
+      publishedAt: true,
+      createdAt: true,
+      updatedAt: true,
     }
   })
 
@@ -32,7 +44,7 @@ export default async function EditReviewPage({ params }: EditReviewPageProps) {
     notFound()
   }
 
-  // 获取所有有效的产品（关联的品牌、类型都是激活状态的）
+  // 获取所有有效的产品
   const products = await prisma.product.findMany({
     where: {
       brand: {
@@ -69,7 +81,7 @@ export default async function EditReviewPage({ params }: EditReviewPageProps) {
     ]
   })
 
-  // 格式化产品数据，添加品牌名称
+  // 格式化产品数据
   const formattedProducts = products.map(product => ({
     id: product.id,
     name: `${product.brand.name} - ${product.name}`

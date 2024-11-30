@@ -8,16 +8,13 @@ export const metadata: Metadata = {
   description: "编辑通道类型信息",
 }
 
-interface EditChannelTypePageProps {
-  params: {
-    id: string
-  }
-}
+type Params = Promise<{ id: string }>   
 
-export default async function EditChannelTypePage({ params }: EditChannelTypePageProps) {
+export default async function EditChannelTypePage({ params }: { params: Params }) {
+  const { id } = await params
   const channelType = await prisma.channelType.findUnique({
     where: {
-      id: params.id
+      id
     }
   })
 

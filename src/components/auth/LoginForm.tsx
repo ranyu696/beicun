@@ -23,31 +23,76 @@ export function LoginForm() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false
+        redirect: false,
       })
 
-      if (result?.error) {
-        toast({
-          variant: "destructive",
-          title: "登录失败",
-          description: result.error
-        })
+      console.log("登录结果:", result)
+
+      if (!result || result.error) {
+        const errorMessage = result?.error || "登录失败"
+        
+        if (errorMessage === "AccessDenied") {
+          toast({
+            title: "邮箱未验证",
+            description: "请先验证您的邮箱后再登录",
+            variant: "destructive",
+          })
+          return
+        }
+
+        switch (errorMessage) {
+          case "用户不存在":
+            toast({
+              title: "账号错误",
+              description: "该邮箱尚未注册",
+              variant: "destructive",
+            })
+            break
+
+          case "邮箱或密码错误":
+            toast({
+              title: "登录失败",
+              description: "邮箱或密码不正确",
+              variant: "destructive",
+            })
+            break
+
+          case "请输入邮箱和密码":
+            toast({
+              title: "输入错误",
+              description: "请填写邮箱和密码",
+              variant: "destructive",
+            })
+            break
+
+          default:
+            toast({
+              title: "登录失败",
+              description: "登录失败，请稍后重试",
+              variant: "destructive",
+            })
+        }
         return
       }
 
-      // 登录成功
       toast({
         title: "登录成功",
         description: "欢迎回来！"
       })
       
-      router.push("/") // 重定向到首页
-      router.refresh() // 刷新页面以更新导航状态
+      if (result.url) {
+        router.push(result.url)
+      } else {
+        router.push("/")
+      }
+      router.refresh()
+
     } catch (error) {
+      console.error("登录异常:", error)
       toast({
+        title: "系统错误",
+        description: "登录过程中发生错误，请稍后重试",
         variant: "destructive",
-        title: "登录失败",  
-        description: "请稍后重试 " + error
       })
     } finally {
       setLoading(false)

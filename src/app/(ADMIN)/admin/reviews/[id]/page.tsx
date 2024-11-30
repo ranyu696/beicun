@@ -41,21 +41,54 @@ const statusLabels: Record<ReviewStatus, StatusLabel> = {
     variant: 'outline' 
   }
 }
-interface ReviewPageProps {
-  params: {
-    id: string
-  }
-}
 
-export default async function ReviewPage({ params }: ReviewPageProps) {
+type Params = Promise<{ id: string }>
+
+export default async function ReviewPage({ params }: { params: Params }) {
+  const { id } = await params
+
   const review = await prisma.review.findUnique({
-    where: { id: params.id },
-    include: {
-      product: true,
-      author: true,
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      unboxing: true,
+      experience: true,
+      maintenance: true,
+      pros: true,
+      cons: true,
+      conclusion: true,
+      views: true,
+      publishedAt: true,
+      createdAt: true,
+      isRecommended: true,
+      product: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          mainImage: true,
+        }
+      },
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        }
+      },
       comments: {
         include: {
-          user: true
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            }
+          }
         },
         orderBy: {
           createdAt: 'desc'
@@ -117,35 +150,30 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
               <div className="prose max-w-none dark:prose-invert">
                 <section className="space-y-4">
                   <h3 className="text-xl font-semibold">开箱体验</h3>
-                  <p className="leading-relaxed">{review.unboxing}</p>
-                  {review.unboxingImages.length > 0 && (
-                    <div className="grid grid-cols-2 gap-4 my-6">
-                      {review.unboxingImages.map((image, index) => (
-                        <div key={index} className="relative aspect-video rounded-lg overflow-hidden">
-                          <Image
-                            src={image}
-                            alt={`开箱图片 ${index + 1}`}
-                            fill
-                            className="object-cover hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div 
+                    className="leading-relaxed prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: review.unboxing }}
+                  />
                 </section>
 
                 <Separator className="my-8" />
 
                 <section className="space-y-4">
-                  <h3 className="text-xl font-semibold">使用感受</h3>
-                  <p className="leading-relaxed">{review.experience}</p>
+  <h3 className="text-xl font-semibold">使用感受</h3>
+                  <div 
+                    className="leading-relaxed prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: review.experience }}
+                  />
                 </section>
 
                 <Separator className="my-8" />
 
                 <section className="space-y-4">
                   <h3 className="text-xl font-semibold">清洁与维护</h3>
-                  <p className="leading-relaxed">{review.maintenance}</p>
+                  <div 
+                    className="leading-relaxed prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: review.maintenance }}
+                  />
                 </section>
 
                 <Separator className="my-8" />
@@ -179,8 +207,11 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
                 <Separator className="my-8" />
 
                 <section className="space-y-4">
-                  <h3 className="text-xl font-semibold">总结</h3>
-                  <p className="leading-relaxed">{review.conclusion}</p>
+  <h3 className="text-xl font-semibold">总结</h3>
+  <div 
+                    className="leading-relaxed prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: review.conclusion }}
+                  />
                 </section>
               </div>
             </CardContent>

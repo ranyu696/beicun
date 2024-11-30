@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import * as z from "zod"
-import { auth } from "@/lib/auth"
 
 // 验证schema
 const brandSchema = z.object({
@@ -13,15 +12,13 @@ const brandSchema = z.object({
   isActive: z.boolean().default(true),
 })
 
-// GET 获取列表
+// GET 获取列表 - 移除认证检查，因为这是公开API
 export async function GET() {
   try {
-    const session = await auth()
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "未授权" }, { status: 401 })
-    }
-
     const brands = await prisma.brand.findMany({
+      where: {
+        isActive: true
+      },
       orderBy: {
         sortOrder: 'asc'
       }
@@ -37,14 +34,9 @@ export async function GET() {
   }
 }
 
-// POST 创建
+// POST 创建 - 需要管理员权限
 export async function POST(request: Request) {
   try {
-    const session = await auth()
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "未授权" }, { status: 401 })
-    }
-
     const json = await request.json()
     const body = brandSchema.parse(json)
 

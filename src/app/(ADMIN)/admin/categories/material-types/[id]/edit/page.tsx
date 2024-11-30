@@ -8,16 +8,13 @@ export const metadata: Metadata = {
   description: "编辑材料类型信息",
 }
 
-interface EditMaterialTypePageProps {
-  params: {
-    id: string
-  }
-}
+type Params = Promise<{ id: string }>
 
-export default async function EditMaterialTypePage({ params }: EditMaterialTypePageProps) {
+export default async function EditMaterialTypePage({ params }: { params: Params }) {
+  const { id } = await params
   const materialType = await prisma.materialType.findUnique({
     where: {
-      id: params.id
+      id
     }
   })
 

@@ -7,6 +7,7 @@ export interface ProductModel {
     productTypeId: string
     channelTypeId: string
     materialTypeId: string
+    utilityTypeId: string
     description?: string
     taobaoUrl?: string
     registrationDate: Date
@@ -23,6 +24,7 @@ export interface ProductModel {
     tightness: 'TIGHT' | 'MEDIUM' | 'LOOSE'
     smell: 'HIGH' | 'MEDIUM' | 'LOW'
     oiliness: 'HIGH' | 'MEDIUM' | 'LOW'
+    durability: 'HIGH' | 'MEDIUM' | 'LOW'
     mainImage: string
     salesImage: string
     videoUrl?: string

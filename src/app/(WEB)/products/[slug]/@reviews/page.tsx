@@ -6,8 +6,9 @@ import { zhCN } from "date-fns/locale"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 
-export default async function ReviewsPage({ params }: { params: { slug: string } }) {
-  const slug = params.slug
+type Params = Promise<{ slug: string }>
+export default async function ReviewsPage({ params }: { params: Params }) {
+  const {slug }= await params
 
   const reviews = await prisma.review.findMany({
     where: {

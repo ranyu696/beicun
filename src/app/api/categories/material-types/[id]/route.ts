@@ -11,10 +11,12 @@ const materialTypeSchema = z.object({
   isActive: z.boolean().default(true),
 })
 
+type Params = Promise<{ id: string }> 
+
 // GET 获取单个
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -22,8 +24,9 @@ export async function GET(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
     const materialType = await prisma.materialType.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!materialType) {
@@ -46,7 +49,7 @@ export async function GET(
 // PUT 更新
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -57,8 +60,9 @@ export async function PUT(
     const json = await request.json()
     const body = materialTypeSchema.parse(json)
 
+    const { id } = await params
     const materialType = await prisma.materialType.update({
-      where: { id: params.id },
+        where: { id },
       data: body
     })
 
@@ -81,7 +85,7 @@ export async function PUT(
 // PATCH 更新状态
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -94,8 +98,9 @@ export async function PATCH(
       isActive: z.boolean()
     }).parse(json)
 
+    const { id } = await params
     const materialType = await prisma.materialType.update({
-      where: { id: params.id },
+      where: { id },
       data: { isActive }
     })
 
@@ -118,7 +123,7 @@ export async function PATCH(
 // DELETE 删除
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -127,8 +132,9 @@ export async function DELETE(
     }
 
     // 检查是否有关联的产品
+    const { id } = await params
     const productsCount = await prisma.product.count({
-      where: { materialTypeId: params.id }
+      where: { materialTypeId: id }
     })
 
     if (productsCount > 0) {
@@ -139,7 +145,7 @@ export async function DELETE(
     }
 
     await prisma.materialType.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })

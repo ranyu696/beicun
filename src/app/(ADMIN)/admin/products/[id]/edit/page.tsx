@@ -4,21 +4,18 @@ import { prisma } from '@/lib/prisma'
 import { ProductModel } from '@/types/product'
 import { Product, ProductImage, ProductTag, Tag } from '@prisma/client'
 
-interface PageProps {
-  params: {
-    id: string
-  }
-}
+type Params = Promise<{ id: string }>
 
 interface ProductWithRelations extends Product {
   ProductImage: ProductImage[]
   tags: (ProductTag & { tag: Tag })[]
 }
 
-export default async function EditProductPage({ params }: PageProps) {
+export default async function EditProductPage({ params }: { params: Params }) {
+  const { id } = await params
   // 获取产品数据
   const product = await prisma.product.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       ProductImage: {
         orderBy: {
@@ -47,6 +44,7 @@ export default async function EditProductPage({ params }: PageProps) {
     productTypeId: product.productTypeId,
     channelTypeId: product.channelTypeId,
     materialTypeId: product.materialTypeId,
+    utilityTypeId: product.utilityTypeId,
     description: product.description || undefined,
     taobaoUrl: product.taobaoUrl || undefined,
     registrationDate: product.registrationDate,
@@ -60,6 +58,7 @@ export default async function EditProductPage({ params }: PageProps) {
     isReversible: product.isReversible,
     stimulation: product.stimulation,
     softness: product.softness,
+    durability: product.durability,
     tightness: product.tightness,
     smell: product.smell,
     oiliness: product.oiliness,
@@ -81,6 +80,9 @@ export default async function EditProductPage({ params }: PageProps) {
   // 获取表单所需的选项数据
   const [brands, productTypes, channelTypes, materialTypes, tags] = await Promise.all([
     prisma.brand.findMany({
+      orderBy: { sortOrder: 'asc' }
+    }),
+    prisma.utilityType.findMany({
       orderBy: { sortOrder: 'asc' }
     }),
     prisma.productType.findMany({

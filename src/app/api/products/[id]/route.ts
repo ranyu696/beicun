@@ -61,10 +61,12 @@ const mediaUpdateSchema = z.object({
   })).optional()
 })
 
+type Params = Promise<{ id: string }>
+
 // 更新产品
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -106,9 +108,10 @@ export async function PATCH(
       throw validationError
     }
 
+    const { id } = await params
     // 检查产品是否存在
     const existing = await prisma.product.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existing) {
@@ -140,7 +143,7 @@ export async function PATCH(
 
     // 更新产品
     const product = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         brand: true,
@@ -181,7 +184,7 @@ export async function PATCH(
 // 删除产品
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth() 
@@ -189,9 +192,10 @@ export async function DELETE(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
     // 检查产品是否存在
     const existing = await prisma.product.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existing) {
@@ -203,7 +207,7 @@ export async function DELETE(
 
     // 删除产品
     await prisma.product.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })

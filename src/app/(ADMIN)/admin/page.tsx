@@ -10,16 +10,79 @@ import {
   TrendingUp,
   Eye
 } from "lucide-react"
+import { prisma } from "@/lib/prisma"
+import { Metadata } from "next"
 
-// 模拟获取统计数据
+export const metadata: Metadata = {
+  title: "仪表盘 - 后台管理",
+  description: "数据统计和概览",
+}
+
+// 获取统计数据
 async function getStats() {
+  const [
+    totalUsers,
+    totalReviews,
+    totalProducts,
+    totalComments,
+    monthlyUsers,
+    monthlyReviews,
+    monthlyProducts,
+    weeklyComments,
+  ] = await Promise.all([
+    // 总用户数
+    prisma.user.count(),
+    // 总测评数
+    prisma.review.count(),
+    // 总产品数
+    prisma.product.count(),
+    // 总评论数
+    prisma.comment.count(),
+    // 本月新增用户
+    prisma.user.count({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().setDate(1)) // 本月1号
+        }
+      }
+    }),
+    // 本月新增测评
+    prisma.review.count({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().setDate(1))
+        }
+      }
+    }),
+    // 本月新增产品
+    prisma.product.count({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().setDate(1))
+        }
+      }
+    }),
+    // 本周新增评论
+    prisma.comment.count({
+      where: {
+        createdAt: {
+          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        }
+      }
+    }),
+  ])
+
   return {
-    totalUsers: 1234,
-    totalReviews: 89,
-    totalProducts: 56,
-    totalComments: 328,
-    viewsToday: 1562,
-    conversion: 3.2
+    totalUsers,
+    totalReviews,
+    totalProducts,
+    totalComments,
+    monthlyUsers,
+    monthlyReviews,
+    monthlyProducts,
+    weeklyComments,
+    viewsToday: 1562, // TODO: 实现浏览统计
+    conversion: 3.2   // TODO: 实现转化率统计
   }
 }
 
@@ -42,7 +105,7 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              +180 位新用户（本月）
+              +{stats.monthlyUsers} 位新用户（本月）
             </p>
           </CardContent>
         </Card>
@@ -55,7 +118,7 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalReviews}</div>
             <p className="text-xs text-muted-foreground">
-              +12 篇测评（本月）
+              +{stats.monthlyReviews} 篇测评（本月）
             </p>
           </CardContent>
         </Card>
@@ -68,7 +131,7 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalProducts}</div>
             <p className="text-xs text-muted-foreground">
-              +8 个产品（本月）
+              +{stats.monthlyProducts} 个产品（本月）
             </p>
           </CardContent>
         </Card>
@@ -81,7 +144,7 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalComments}</div>
             <p className="text-xs text-muted-foreground">
-              +42 条评论（本周）
+              +{stats.weeklyComments} 条评论（本周）
             </p>
           </CardContent>
         </Card>

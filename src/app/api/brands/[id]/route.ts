@@ -13,9 +13,10 @@ const brandSchema = z.object({
 })
 
 // GET 获取单个
+type Params = Promise<{ id: string }>
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -23,8 +24,9 @@ export async function GET(
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
 
+    const { id } = await params
     const brand = await prisma.brand.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!brand) {
@@ -47,7 +49,7 @@ export async function GET(
 // PUT 更新
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -65,9 +67,9 @@ export async function PUT(
       logo: body.logo || null,
       website: body.website || null,
     }
-
+    const { id } = await params
     const brand = await prisma.brand.update({
-      where: { id: params.id },
+      where: { id },
       data
     })
 
@@ -90,7 +92,7 @@ export async function PUT(
 // PATCH 更新状态
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Params }
 ) {
   try {
     const session = await auth()
@@ -102,9 +104,10 @@ export async function PATCH(
     const { isActive } = z.object({
       isActive: z.boolean()
     }).parse(json)
+    const { id } = await params
 
     const brand = await prisma.brand.update({
-      where: { id: params.id },
+      where: { id },
       data: { isActive }
     })
 
@@ -127,17 +130,18 @@ export async function PATCH(
 // DELETE 删除
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+    { params }: { params: Params }
 ) {
   try {
     const session = await auth()
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: "未授权" }, { status: 401 })
     }
+    const { id } = await params
 
     // 检查是否有关联的产品
     const productsCount = await prisma.product.count({
-      where: { brandId: params.id }
+      where: { brandId: id }
     })
 
     if (productsCount > 0) {
@@ -148,7 +152,7 @@ export async function DELETE(
     }
 
     await prisma.brand.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })

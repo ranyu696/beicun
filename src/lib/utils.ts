@@ -99,3 +99,21 @@ export const getParameterText = (value: MapKey | null | undefined, type: 'softne
   
   return maps[type][value as keyof typeof maps[typeof type]] || '未知'
 }
+
+export function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
+export function formatShortDate(date: Date): string {
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  }).format(date)
+}

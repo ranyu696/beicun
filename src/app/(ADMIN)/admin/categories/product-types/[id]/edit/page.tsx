@@ -8,16 +8,13 @@ export const metadata: Metadata = {
   description: "编辑产品类型信息",
 }
 
-interface EditProductTypePageProps {
-  params: {
-    id: string
-  }
-}
+type Params = Promise<{ id: string }>
 
-export default async function EditProductTypePage({ params }: EditProductTypePageProps) {
+export default async function EditProductTypePage({ params }: { params: Params }) {
+  const { id } = await params
   const productType = await prisma.productType.findUnique({
     where: {
-      id: params.id
+      id
     }
   })
 

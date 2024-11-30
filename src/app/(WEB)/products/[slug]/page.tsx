@@ -45,8 +45,11 @@ async function getProduct(slug: string) {
   return product
 }
 
-export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const product = await getProduct(params.slug)
+type Params = Promise<{ slug: string }>
+export default async function ProductPage({ params }: { params: Params }) {
+
+  const {slug }= await params
+  const product = await getProduct(slug)
   
   return (
     <article className="space-y-8">
