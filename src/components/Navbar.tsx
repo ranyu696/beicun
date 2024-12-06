@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Menu, Search, X } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useState } from "react"
 import {
   NavigationMenu,
@@ -42,7 +42,7 @@ const tutorials = [
   {
     title: "常见问题",
     href: "/tutorials/faq",
-    description: "解答用户最常遇到的问题和疑惑。"
+    description: "解答用户最常遇到的问题和疑���。"
   }
 ]
 
@@ -145,7 +145,11 @@ export function Navbar() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <nav className="flex flex-col space-y-4">
+                <SheetHeader>
+                  <SheetTitle>导航菜单</SheetTitle>
+                </SheetHeader>
+                
+                <nav className="flex flex-col space-y-4 mt-6">
                   <Link 
                     href="/" 
                     className="px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 rounded-md"

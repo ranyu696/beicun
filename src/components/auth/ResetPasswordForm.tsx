@@ -79,12 +79,6 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">重置密码</h1>
-        <p className="text-sm text-muted-foreground">
-          请输入您的新密码
-        </p>
-      </div>
       <div className="space-y-4">
         <Input
           type="password"

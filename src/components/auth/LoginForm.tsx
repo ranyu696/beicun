@@ -8,7 +8,11 @@ import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
-export function LoginForm() {
+interface LoginFormProps {
+  modal?: boolean
+}
+
+export function LoginForm({ modal }: LoginFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -25,8 +29,6 @@ export function LoginForm() {
         password,
         redirect: false,
       })
-
-      console.log("登录结果:", result)
 
       if (!result || result.error) {
         const errorMessage = result?.error || "登录失败"
@@ -80,11 +82,15 @@ export function LoginForm() {
         description: "欢迎回来！"
       })
       
-      if (result.url) {
+      if (modal) {
+        // 如果是模态框，返回上一页
+        router.back()
+      } else if (result.url) {
         router.push(result.url)
       } else {
         router.push("/")
       }
+      
       router.refresh()
 
     } catch (error) {
@@ -101,12 +107,6 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">登录账号</h1>
-        <p className="text-sm text-muted-foreground">
-          输入您的邮箱和密码登录
-        </p>
-      </div>
       <div className="space-y-4">
         <Input
           type="email"

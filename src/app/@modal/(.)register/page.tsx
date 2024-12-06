@@ -1,13 +1,26 @@
-import { RegisterForm } from '@/components/auth/RegisterForm'
-import { Modal } from '@/components/Modal'
+'use client'
 
+import { RegisterForm } from "@/components/auth/RegisterForm"
+import { 
+  Dialog, 
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription 
+} from "@/components/ui/dialog"
 
 export default function RegisterModal() {
   return (
-    <Modal>
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
-        <RegisterForm />
-      </div>
-    </Modal>
+    <Dialog defaultOpen>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>创建账号</DialogTitle>
+          <DialogDescription>
+            注册新账号开始探索
+          </DialogDescription>
+        </DialogHeader>
+        <RegisterForm modal />
+      </DialogContent>
+    </Dialog>
   )
 }

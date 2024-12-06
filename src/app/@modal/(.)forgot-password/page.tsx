@@ -1,6 +1,6 @@
 'use client'
 
-import { LoginForm } from "@/components/auth/LoginForm"
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm"
 import { 
   Dialog, 
   DialogContent,
@@ -9,18 +9,18 @@ import {
   DialogDescription 
 } from "@/components/ui/dialog"
 
-export default function LoginModal() {
+export default function ForgotPasswordModal() {
   return (
     <Dialog defaultOpen>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>登录账号</DialogTitle>
+          <DialogTitle>忘记密码</DialogTitle>
           <DialogDescription>
-            输入您的邮箱和密码登录
+            输入您的邮箱，我们将发送重置密码链接
           </DialogDescription>
         </DialogHeader>
-        <LoginForm modal />
+        <ForgotPasswordForm modal />
       </DialogContent>
     </Dialog>
   )
-}
+} 

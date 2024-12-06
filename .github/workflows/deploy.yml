@@ -50,7 +50,7 @@ jobs:
             # 创建日志目录
             mkdir -p logs
             # 复制环境变量文件
-            cp .env.production .env
+            cp .env.production
             # 安装依赖并构建
             yarn install
             npx prisma generate

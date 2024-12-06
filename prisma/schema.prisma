@@ -293,7 +293,7 @@ model ProductTag {
 // 器具类型模型
 model UtilityType {
   id          String    @id @default(cuid())
-  name        String    @unique    // 器具类型名称,如:茶具、酒具、餐具等
+  name        String    @unique    // 器具类型
   description String?   @db.Text   // 类型描述
   icon        String?   // 类型图标
   products    Product[] // 关联产品

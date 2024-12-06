@@ -7,7 +7,11 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  modal?: boolean
+}
+
+export function RegisterForm({ modal }: RegisterFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -53,7 +57,12 @@ export function RegisterForm() {
         description: "验证邮件已发送到您的邮箱，请查收"
       })
       
-      router.push("/login")
+      if (modal) {
+        router.back()
+      } else {
+        router.push("/login")
+      }
+      router.refresh()
     } catch (error) {
       toast({
         variant: "destructive",
@@ -67,12 +76,6 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">注册账号</h1>
-        <p className="text-sm text-muted-foreground">
-          创建您的账号以开始使用
-        </p>
-      </div>
       <div className="space-y-4">
         <Input
           type="email"

@@ -5,6 +5,12 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/utils"
 import { notFound } from "next/navigation"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: '产品列表 - 杯村测评',
+  description: '探索杯村的所有产品',
+}
 
 async function getProducts() {
   try {
@@ -20,20 +26,19 @@ async function getProducts() {
       }
     })
 
-    if (!products.length) {
-      notFound()
-    }
-
     return products
   } catch (error) {
-    throw new Error(
-      `Failed to fetch products: ${error instanceof Error ? error.message : 'Unknown error'}`
-    )
+    console.error('获取产品列表失败:', error)
+    return null
   }
 }
 
 export default async function ProductsPage() {
   const products = await getProducts()
+
+  if (!products || products.length === 0) {
+    notFound()
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 lg:py-8">

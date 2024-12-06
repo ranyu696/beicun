@@ -2,12 +2,16 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 
-export function ForgotPasswordForm() {
+interface ForgotPasswordFormProps {
+  modal?: boolean
+}
+
+export function ForgotPasswordForm({ modal }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -34,10 +38,15 @@ export function ForgotPasswordForm() {
 
       toast({
         title: "邮件已发送",
-        description: "请检查您的邮箱，按照邮件中的说明重置密码"
+        description: "请查看您的邮箱，点击链接重置密码"
       })
-      
-      router.push("/login")
+
+      if (modal) {
+        router.back()
+      } else {
+        router.push("/login")
+      }
+      router.refresh()
     } catch (error) {
       toast({
         variant: "destructive",
@@ -51,12 +60,6 @@ export function ForgotPasswordForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">忘记密码</h1>
-        <p className="text-sm text-muted-foreground">
-          输入您的邮箱，我们将发送重置密码的链接
-        </p>
-      </div>
       <div className="space-y-4">
         <Input
           type="email"
