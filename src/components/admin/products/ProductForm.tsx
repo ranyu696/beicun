@@ -411,7 +411,7 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
       nonZh: 'consecutive' // 保留非中文字符
     })
 
-    // 转小写并规范化
+    // 转小写并规范
     return pinyinStr
       .toLowerCase()
       .replace(/\s+/g, '-') // 将空格替换为连字符
@@ -1173,35 +1173,64 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                   <FormDescription>
                     用于产品列表和详情页展示的主要图片
                   </FormDescription>
-                  <FormControl>
-                    <div className="space-y-4">
-                      {(filesToUpload.mainImage?.preview || field.value) && (
-                        <div className="relative aspect-square w-[200px]">
-                          <Image
-                            src={filesToUpload.mainImage?.preview || field.value || ''}
-                            alt="主图"
-                            fill
-                            className="object-cover rounded-lg"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2"
-                            onClick={() => {
-                              if (filesToUpload.mainImage?.preview) {
-                                URL.revokeObjectURL(filesToUpload.mainImage.preview)
-                              }
-                              setFilesToUpload(prev => ({ ...prev, mainImage: null }))
-                              field.onChange('')
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
+<FormControl>
+  <div className="space-y-4">
+    {(filesToUpload.mainImage?.preview || field.value) ? (
+      <div className="relative aspect-square w-[200px]">
+        <Image
+          src={filesToUpload.mainImage?.preview || field.value || ''}
+          alt="主图"
+          fill
+          className="object-cover rounded-lg"
+        />
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="absolute top-2 right-2"
+          onClick={() => {
+            if (filesToUpload.mainImage?.preview) {
+              URL.revokeObjectURL(filesToUpload.mainImage.preview)
+            }
+            setFilesToUpload(prev => ({ ...prev, mainImage: null }))
+            field.onChange('')
+          }}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    ) : (
+      <div 
+        className="flex flex-col items-center justify-center gap-4 p-6 border-2 border-dashed rounded-lg hover:border-primary/50 transition cursor-pointer"
+        onClick={() => document.getElementById('main-image-upload')?.click()}
+      >
+        <ImagePlus className="h-10 w-10 text-muted-foreground" />
+        <div className="text-sm text-muted-foreground text-center">
+          <span>点击或拖放图片至此处</span>
+          <p className="text-xs">支持 JPG、PNG、GIF 格式，最大 5MB</p>
+        </div>
+        <input
+          id="main-image-upload"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) {
+              const fileToUpload = handleSingleFileSelect(file, 'main')
+              if (fileToUpload) {
+                setFilesToUpload(prev => ({
+                  ...prev,
+                  mainImage: fileToUpload
+                }))
+              }
+            }
+          }}
+        />
+      </div>
+    )}
+  </div>
+</FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -1217,35 +1246,64 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                   <FormDescription>
                     用于商品推广的营销图片
                   </FormDescription>
-                  <FormControl>
-                    <div className="space-y-4">
-                      {(filesToUpload.salesImage?.preview || field.value) && (
-                        <div className="relative aspect-square w-[200px]">
-                          <Image
-                            src={filesToUpload.salesImage?.preview || field.value || ''}
-                            alt="销售图"
-                            fill
-                            className="object-cover rounded-lg"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2"
-                            onClick={() => {
-                              if (filesToUpload.salesImage?.preview) {
-                                URL.revokeObjectURL(filesToUpload.salesImage.preview)
-                              }
-                              setFilesToUpload(prev => ({ ...prev, salesImage: null }))
-                              field.onChange('')
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
+<FormControl>
+  <div className="space-y-4">
+    {(filesToUpload.salesImage?.preview || field.value) ? (
+      <div className="relative aspect-square w-[200px]">
+        <Image
+          src={filesToUpload.salesImage?.preview || field.value || ''}
+          alt="销售图"
+          fill
+          className="object-cover rounded-lg"
+        />
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="absolute top-2 right-2"
+          onClick={() => {
+            if (filesToUpload.salesImage?.preview) {
+              URL.revokeObjectURL(filesToUpload.salesImage.preview)
+            }
+            setFilesToUpload(prev => ({ ...prev, salesImage: null }))
+            field.onChange('')
+          }}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    ) : (
+      <div 
+        className="flex flex-col items-center justify-center gap-4 p-6 border-2 border-dashed rounded-lg hover:border-primary/50 transition cursor-pointer"
+        onClick={() => document.getElementById('sales-image-upload')?.click()}
+      >
+        <ImagePlus className="h-10 w-10 text-muted-foreground" />
+        <div className="text-sm text-muted-foreground text-center">
+          <span>点击或拖放图片至此处</span>
+          <p className="text-xs">支持 JPG、PNG、GIF 格式，最大 5MB</p>
+        </div>
+        <input
+          id="sales-image-upload"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) {
+              const fileToUpload = handleSingleFileSelect(file, 'sales')
+              if (fileToUpload) {
+                setFilesToUpload(prev => ({
+                  ...prev,
+                  salesImage: fileToUpload
+                }))
+              }
+            }
+          }}
+        />
+      </div>
+    )}
+  </div>
+</FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -1266,7 +1324,7 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                       {(filesToUpload.video?.preview || field.value) ? (
                         <div className="relative w-[300px]">
                           <video 
-                            src={filesToUpload.video?.preview || field.value}
+                            src={filesToUpload.video?.preview || field.value || ''}
                             controls
                             className="w-full rounded-lg"
                           />
@@ -1316,130 +1374,6 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                           />
                         </div>
                       )}
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    支持 MP4、WebM 格式视频，最大 100MB
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 官方详情图片 */}
-            <FormField
-              control={form.control}
-              name="detailImages"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>官方详情图片</FormLabel>
-                  <FormDescription>
-                    产品详情页展示官方图片，支持多张图��上传和排序
-                  </FormDescription>
-                  <FormControl>
-                    <div className="space-y-4">
-                      {/* 已上传的图片 */}
-                      {field.value?.length > 0 && (
-                        <div className="grid grid-cols-4 gap-4">
-                          {field.value.map((url, index) => (
-                            <div key={url} className="relative aspect-square">
-                              <Image
-                                src={url}
-                                alt={`详情图片 ${index + 1}`}
-                                fill
-                                className="object-cover rounded-lg"
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute top-2 right-2"
-                                onClick={() => {
-                                  field.onChange(field.value.filter((_, i) => i !== index))
-                                }}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* 待上传的图片 */}
-                      <DragDropContext onDragEnd={handleDetailImageReorder}>
-                        <Droppable droppableId="detail-images">
-                          {(provided) => (
-                            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                              {filesToUpload.detailImages.map((file, index) => (
-                                <Draggable key={file.preview} draggableId={file.preview} index={index}>
-                                  {(provided) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      className="flex items-center gap-2 p-2 bg-muted rounded-lg group"
-                                    >
-                                      <div {...provided.dragHandleProps}>
-                                        <GripVertical className="h-5 w-5 text-muted-foreground" />
-                                      </div>
-                                      <div className="relative h-20 w-20">
-                                        <Image
-                                          src={file.preview}
-                                          alt={`预览图片 ${index + 1}`}
-                                          fill
-                                          className="object-cover rounded-md"
-                                        />
-                                      </div>
-                                      <div className="ml-2 flex-1 min-w-0">
-                                        <p className="text-sm truncate">{file.file.name}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                          待上传 - {(file.file.size / 1024 / 1024).toFixed(2)}MB
-                                        </p>
-                                      </div>
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={() => {
-                                          URL.revokeObjectURL(file.preview)
-                                          setFilesToUpload(prev => ({
-                                            ...prev,
-                                            detailImages: prev.detailImages.filter((_, i) => i !== index)
-                                          }))
-                                        }}
-                                      >
-                                        <X className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </DragDropContext>
-
-                      {/* 上传区域 */}
-                      <div
-                        {...getRootProps()}
-                        className={cn(
-                          "border-2 border-dashed rounded-lg p-6 hover:border-primary/50 transition-colors",
-                          "flex flex-col items-center justify-center gap-2",
-                          isDragActive && "border-primary/50 bg-primary/5"
-                        )}
-                      >
-                        <input {...getInputProps()} />
-                        <ImagePlus className="h-10 w-10 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground text-center">
-                          {isDragActive
-                            ? "放开以上传图片"
-                            : "点击或拖拽图片至此处添加"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          支持 PNG、JPG、WEBP、GIF 格式，单个文件最大 5MB
-                        </p>
-                      </div>
                     </div>
                   </FormControl>
                   <FormMessage />
