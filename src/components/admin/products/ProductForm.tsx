@@ -48,7 +48,7 @@ const productSchema = z.object({
   channelTypeId: z.string().min(1, '请选择通道类型'),
   materialTypeId: z.string().min(1, '请选择材料类型'),
   description: z.string().optional(),
-  taobaoUrl: z.string().url('请输入有效的淘宝链接').optional(),
+  taobaoUrl: z.string().optional(),
   
   // 规格参数
   registrationDate: z.date(),
@@ -70,8 +70,8 @@ const productSchema = z.object({
   durability: z.enum(['HIGH', 'MEDIUM', 'LOW']),
   
   // 媒体资源
-  mainImage: z.string().min(1, '请上传产品主图'),
-  salesImage: z.string().min(1, '请上传销售图'),
+  mainImage: z.string().optional(),
+  salesImage: z.string().optional(),
   videoUrl: z.string().optional(),
   detailImages: z.array(z.string()),
   productImages: z.array(z.object({
@@ -239,6 +239,25 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
   async function onSubmit(data: ProductFormValues) {
     try {
       setLoading(true)
+
+      // 添加文件验证
+      if (!initialData?.mainImage && !filesToUpload.mainImage) {
+        toast({
+          variant: "destructive",
+          title: "验证失败",
+          description: "请上传产品主图"
+        })
+        return
+      }
+
+      if (!initialData?.salesImage && !filesToUpload.salesImage) {
+        toast({
+          variant: "destructive",
+          title: "验证失败",
+          description: "请上传销售图"
+        })
+        return
+      }
 
       // 1. 创建/更新产品基本信息
       const productResponse = await fetch(
@@ -970,7 +989,7 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel>可翻洗</FormLabel>
+                    <FormLabel>可洗</FormLabel>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -1156,10 +1175,10 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                   </FormDescription>
                   <FormControl>
                     <div className="space-y-4">
-                      {(filesToUpload.mainImage?.preview || field.value) ? (
+                      {(filesToUpload.mainImage?.preview || field.value) && (
                         <div className="relative aspect-square w-[200px]">
                           <Image
-                            src={filesToUpload.mainImage?.preview || field.value}
+                            src={filesToUpload.mainImage?.preview || field.value || ''}
                             alt="主图"
                             fill
                             className="object-cover rounded-lg"
@@ -1179,35 +1198,6 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                           >
                             <X className="h-4 w-4" />
                           </Button>
-                        </div>
-                      ) : (
-                        <div 
-                          className="flex flex-col items-center justify-center gap-4 p-6 border-2 border-dashed rounded-lg hover:border-primary/50 transition cursor-pointer"
-                          onClick={() => document.getElementById('main-image-upload')?.click()}
-                        >
-                          <ImagePlus className="h-10 w-10 text-muted-foreground" />
-                          <div className="text-sm text-muted-foreground text-center">
-                            <span>点击或拖放图片至此处</span>
-                            <p className="text-xs">支持 JPG、PNG、GIF 格式，最大 5MB</p>
-                          </div>
-                          <input
-                            id="main-image-upload"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0]
-                              if (file) {
-                                const fileToUpload = handleSingleFileSelect(file, 'main')
-                                if (fileToUpload) {
-                                  setFilesToUpload(prev => ({
-                                    ...prev,
-                                    mainImage: fileToUpload
-                                  }))
-                                }
-                              }
-                            }}
-                          />
                         </div>
                       )}
                     </div>
@@ -1229,10 +1219,10 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                   </FormDescription>
                   <FormControl>
                     <div className="space-y-4">
-                      {(filesToUpload.salesImage?.preview || field.value) ? (
+                      {(filesToUpload.salesImage?.preview || field.value) && (
                         <div className="relative aspect-square w-[200px]">
                           <Image
-                            src={filesToUpload.salesImage?.preview || field.value}
+                            src={filesToUpload.salesImage?.preview || field.value || ''}
                             alt="销售图"
                             fill
                             className="object-cover rounded-lg"
@@ -1252,35 +1242,6 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                           >
                             <X className="h-4 w-4" />
                           </Button>
-                        </div>
-                      ) : (
-                        <div 
-                          className="flex flex-col items-center justify-center gap-4 p-6 border-2 border-dashed rounded-lg hover:border-primary/50 transition cursor-pointer"
-                          onClick={() => document.getElementById('sales-image-upload')?.click()}
-                        >
-                          <ImagePlus className="h-10 w-10 text-muted-foreground" />
-                          <div className="text-sm text-muted-foreground text-center">
-                            <span>点击或拖放图片至处</span>
-                            <p className="text-xs">支持 JPG、PNG、GIF 格式，最大 5MB</p>
-                          </div>
-                          <input
-                            id="sales-image-upload"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0]
-                              if (file) {
-                                const fileToUpload = handleSingleFileSelect(file, 'sales')
-                                if (fileToUpload) {
-                                  setFilesToUpload(prev => ({
-                                    ...prev,
-                                    salesImage: fileToUpload
-                                  }))
-                                }
-                              }
-                            }}
-                          />
                         </div>
                       )}
                     </div>
@@ -1373,7 +1334,7 @@ export function ProductForm({ initialData, formData }: ProductFormProps) {
                 <FormItem>
                   <FormLabel>官方详情图片</FormLabel>
                   <FormDescription>
-                    产品详情页展示官方图片，支持多张图片上传和排序
+                    产品详情页展示官方图片，支持多张图��上传和排序
                   </FormDescription>
                   <FormControl>
                     <div className="space-y-4">
