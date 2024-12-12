@@ -1,4 +1,10 @@
 import { S3Client, ListObjectsV2Command, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
+import { 
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand
+} from '@aws-sdk/client-s3'
 
 export interface R2Object {
   key: string
@@ -174,13 +180,84 @@ export async function deleteR2Object(key: string): Promise<boolean> {
   }
 }
 
-// 上传文件
-// 修改上传函数签名
+// 添加分片上传相关的类型定义
+interface UploadPart {
+  ETag: string;
+  PartNumber: number;
+}
+
+interface MultipartUpload {
+  uploadId: string;
+  parts: UploadPart[];
+}
+
+// 添加上传结果���型定义
+interface UploadPartResult {
+  ETag?: string;
+}
+
+// 存储正在进行的分片上传
+const activeUploads = new Map<string, MultipartUpload>()
+
+// 创建分片上传任务
+export async function createMultipartUpload(key: string) {
+  try {
+    const command = new CreateMultipartUploadCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: key,
+      ContentType: 'video/mp4'
+    })
+    const response = await s3Client.send(command)
+    const uploadId = response.UploadId!
+
+    // 保存上传信息
+    activeUploads.set(key, {
+      uploadId,
+      parts: []
+    })
+
+    return { uploadId }
+  } catch (error) {
+    console.error('创建分片上传失败:', error)
+    throw error
+  }
+}
+
+// 上传分片
 export async function uploadR2Object(
   buffer: Buffer, 
   key: string, 
-  contentType: string
-): Promise<boolean> {
+  contentType: string,
+  options?: { uploadId?: string; partNumber?: number }
+): Promise<UploadPartResult> {
+  if (options?.uploadId) {
+    try {
+      const command = new UploadPartCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: key,
+        UploadId: options.uploadId,
+        PartNumber: options.partNumber,
+        Body: buffer
+      })
+      const response = await s3Client.send(command)
+      
+      // 保存分片信息
+      const upload = activeUploads.get(key)
+      if (upload && response.ETag) {
+        upload.parts.push({
+          ETag: response.ETag,
+          PartNumber: options.partNumber!
+        })
+        activeUploads.set(key, upload)
+      }
+
+      return { ETag: response.ETag }
+    } catch (error) {
+      console.error('上传分片失败:', error)
+      throw error
+    }
+  }
+
   try {
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
@@ -190,9 +267,91 @@ export async function uploadR2Object(
     })
 
     await s3Client.send(command)
-    return true
+    return {} // 返回空对象而不是 true
   } catch (error) {
     console.error("上传文件失败:", error)
+    throw error
+  }
+}
+
+// 完成分片上传
+export async function completeMultipartUpload(key: string, uploadId: string) {
+  try {
+    const upload = activeUploads.get(key)
+    if (!upload) {
+      throw new Error('找不到上传任务')
+    }
+
+    // 确保分片按顺序排列
+    const sortedParts = upload.parts.sort((a, b) => a.PartNumber - b.PartNumber)
+
+    const command = new CompleteMultipartUploadCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: key,
+      UploadId: uploadId,
+      MultipartUpload: {
+        Parts: sortedParts
+      }
+    })
+
+    const result = await s3Client.send(command)
+    
+    // 清理上传信息
+    activeUploads.delete(key)
+    
+    return result
+  } catch (error) {
+    console.error('完成分片上传失败:', error)
+    throw error
+  }
+}
+
+// 中止分片上传
+export async function abortMultipartUpload(key: string, uploadId: string) {
+  try {
+    const command = new AbortMultipartUploadCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: key,
+      UploadId: uploadId
+    })
+    await s3Client.send(command)
+    activeUploads.delete(key)
+  } catch (error) {
+    console.error('中止分片上传失败:', error)
+    throw error
+  }
+}
+
+// 删除文件夹及其内容
+export async function deleteR2Folder(folderPath: string): Promise<boolean> {
+  try {
+    // 确保文件夹路径以 / 结尾
+    const prefix = folderPath.endsWith('/') ? folderPath : `${folderPath}/`
+
+    // 列出文件夹下所有对象
+    const { objects } = await listR2Objects({
+      prefix,
+      maxKeys: 1000, // 设置较大的值以便一次性获取所有文件
+    })
+
+    if (objects.length === 0) {
+      return true
+    }
+
+    // 批量删除所有对象
+    const deletePromises = objects.map(obj => 
+      deleteR2Object(obj.key)
+    )
+
+    // 等待所有删除操作完成
+    await Promise.all(deletePromises)
+
+    // 最后删除文件夹本身
+    await deleteR2Object(prefix)
+
+    return true
+  } catch (error) {
+    console.error("删除文件夹失败:", error)
     throw error
   }
 }

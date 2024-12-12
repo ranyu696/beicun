@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { ProductForm } from "@/components/admin/products/ProductForm"
+import { ProductNewForm } from "@/components/admin/products/ProductNewForm"
 import { prisma } from "@/lib/prisma"
 
 export const metadata: Metadata = {
@@ -53,7 +53,7 @@ export default async function NewProductPage() {
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <ProductForm formData={formData} />
+        <ProductNewForm formData={formData} />
       </div>
     </div>
   )

@@ -117,3 +117,12 @@ export function formatShortDate(date: Date): string {
     day: 'numeric'
   }).format(date)
 }
+
+// 生成日期路径
+export function getDatePath(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}

@@ -18,7 +18,7 @@ export function ProductCard({ product }: ProductCardProps) {
     : 0;
 
   return (
-    <Link href={`/products/${product.id}`}>
+    <Link href={`/products/${product.slug}`}>
       <Card className="hover:shadow-lg transition-shadow">
         <CardHeader className="p-0">
           <div className="aspect-square relative">

@@ -13,7 +13,7 @@ type BrandProps = {
 
 export function BrandCard({ brand }: BrandProps) {
   return (
-    <Link href={`/brands/${brand.id}`}>
+    <Link href={`/brands/${brand.name}`}>
       <Card className="text-center hover:shadow-lg transition-shadow">
         <CardContent className="pt-6">
           <div className="mb-4 inline-flex items-center justify-center w-24 h-24 rounded-full bg-gray-50">

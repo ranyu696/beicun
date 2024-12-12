@@ -1,69 +1,52 @@
 import { NextResponse } from "next/server"
-import { auth} from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import * as z from "zod"
+import { Prisma } from "@prisma/client"
+import {  deleteR2Folder } from '@/lib/r2'
 
-const productSchema = z.object({
-    // 基本信息
-    name: z.string().min(1, '请输入产品名称'),
-    slug: z.string().min(1, '请输入URL标识'),
-    price: z.number().min(0, '价格不能小于0'),
-    brandId: z.string().min(1, '请选择品牌'),
-    productTypeId: z.string().min(1, '请选择产品类型'),
-    channelTypeId: z.string().min(1, '请选择通道类型'),
-    materialTypeId: z.string().min(1, '请选择材料类型'),
-    description: z.string().optional(),
-    taobaoUrl: z.string().url('请输入有效的淘宝链接').optional(),
-    
-    // 规格参数
-    registrationDate: z.string().transform(str => new Date(str)),
-    height: z.number().min(0),
-    width: z.number().min(0),
-    length: z.number().min(0),
-    channelLength: z.number().min(0),
-    totalLength: z.number().min(0),
-    weight: z.number().min(0),
-    version: z.string(),
-    isReversible: z.boolean(),
-    
-    // 产品特性
-    stimulation: z.enum(['LOW', 'MEDIUM', 'HIGH']),
-    softness: z.enum(['ULTRA_SOFT', 'SOFT', 'MEDIUM', 'HARD', 'ULTRA_HARD']),
-    tightness: z.enum(['TIGHT', 'MEDIUM', 'LOOSE']),
-    smell: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-    oiliness: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-    
-    // 媒体资源
-    mainImage: z.string().min(1, '请上传产品主图'),
-    salesImage: z.string().min(1, '请上传销售图'),
-    videoUrl: z.string().optional(),
-    detailImages: z.array(z.string()),
-    productImages: z.array(z.object({
-      url: z.string(),
-      order: z.number(),
-      description: z.string().optional()
-    })).optional(),
-    
-    // 标签
-    tagIds: z.array(z.string()).optional()
-  })
+// 简化的产品更新验证 schema
+const productUpdateSchema = z.object({
+  // 基本字段
+  name: z.string().min(1).optional(),
+  slug: z.string().min(1).optional(),
+  price: z.number().min(0).optional(),
+  description: z.string().nullish(),
+  taobaoUrl: z.string().nullish(),
   
-// 1. 定义媒体更新的验证 schema
-const mediaUpdateSchema = z.object({
-  mainImage: z.string().optional(),
-  salesImage: z.string().optional(),
-  videoUrl: z.string().optional(),
-  detailImages: z.array(z.string()).optional(),
-  productImages: z.array(z.object({
-    url: z.string(),
-    order: z.number(),
-    description: z.string().optional()
-  })).optional()
+  // 数值字段 - 使用 Prisma 的 set 操作
+  height: z.number().min(0).optional(),
+  width: z.number().min(0).optional(),
+  length: z.number().min(0).optional(),
+  channelLength: z.number().min(0).optional(),
+  totalLength: z.number().min(0).optional(),
+  weight: z.number().min(0).optional(),
+  
+  // 其他字段
+  version: z.string().optional(),
+  isReversible: z.boolean().optional(),
+  registrationDate: z.string().transform(str => new Date(str)).optional(),
+  
+  // 枚举字段
+  stimulation: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  softness: z.enum(['ULTRA_SOFT', 'SOFT', 'MEDIUM', 'HARD', 'ULTRA_HARD']).optional(),
+  tightness: z.enum(['TIGHT', 'MEDIUM', 'LOOSE']).optional(),
+  smell: z.enum(['HIGH', 'MEDIUM', 'LOW']).optional(),
+  oiliness: z.enum(['HIGH', 'MEDIUM', 'LOW']).optional(),
+  
+  // 关联ID
+  brandId: z.string().optional(),
+  productTypeId: z.string().optional(),
+  channelTypeId: z.string().optional(),
+  materialTypeId: z.string().optional(),
+  utilityTypeId: z.string().optional(),
+  
+  // 标签
+  tagIds: z.array(z.string()).optional()
 })
 
 type Params = Promise<{ id: string }>
 
-// 更新产品
 export async function PATCH(
   request: Request,
   { params }: { params: Params }
@@ -75,109 +58,56 @@ export async function PATCH(
     }
 
     const json = await request.json()
-    console.log('接收到的更新数据:', json) // 添加日志
+    const body = productUpdateSchema.parse(json)
 
-    // 判断是否为媒体更新
-    const isMediaUpdate = json.mainImage !== undefined || 
-                         json.salesImage !== undefined || 
-                         json.videoUrl !== undefined || 
-                         json.detailImages !== undefined || 
-                         json.productImages !== undefined
-
-    let body
-    try {
-      if (isMediaUpdate) {
-        body = mediaUpdateSchema.parse(json)
-      } else {
-        body = productSchema.parse(json)
-      }
-    } catch (validationError) {
-      console.error('验证错误:', validationError) // 添加详细的验证错误日志
-      if (validationError instanceof z.ZodError) {
-        return NextResponse.json(
-          { 
-            error: "数据验证失败", 
-            details: validationError.errors.map(err => ({
-              path: err.path.join('.'),
-              message: err.message
-            }))
-          },
-          { status: 400 }
-        )
-      }
-      throw validationError
+    // 构建 Prisma 更新数据
+    const updateData: Prisma.ProductUpdateInput = {
+      ...(body.name && { name: body.name }),
+      ...(body.slug && { slug: body.slug }),
+      ...(body.price && { price: body.price }),
+      ...(body.description !== undefined && { description: body.description }),
+      ...(body.taobaoUrl !== undefined && { taobaoUrl: body.taobaoUrl }),
+      ...(body.height !== undefined && { height: body.height }),
+      ...(body.width !== undefined && { width: body.width }),
+      ...(body.length !== undefined && { length: body.length }),
+      ...(body.channelLength !== undefined && { channelLength: body.channelLength }),
+      ...(body.totalLength !== undefined && { totalLength: body.totalLength }),
+      ...(body.weight !== undefined && { weight: body.weight }),
+      ...(body.version !== undefined && { version: body.version }),
+      ...(body.isReversible !== undefined && { isReversible: body.isReversible }),
+      ...(body.registrationDate && { registrationDate: body.registrationDate }),
+      ...(body.stimulation !== undefined && { stimulation: body.stimulation }),
+      ...(body.softness !== undefined && { softness: body.softness }),
+      ...(body.tightness !== undefined && { tightness: body.tightness }),
+      ...(body.smell !== undefined && { smell: body.smell }),
+      ...(body.oiliness !== undefined && { oiliness: body.oiliness }),
+      ...(body.brandId && { brand: { connect: { id: body.brandId } } }),
+      ...(body.productTypeId && { productType: { connect: { id: body.productTypeId } } }),
+      ...(body.channelTypeId && { channelType: { connect: { id: body.channelTypeId } } }),
+      ...(body.materialTypeId && { materialType: { connect: { id: body.materialTypeId } } }),
+      ...(body.utilityTypeId && { utilityType: { connect: { id: body.utilityTypeId } } }),
+      ...(body.tagIds && {
+        tags: {
+          deleteMany: {},
+          create: body.tagIds.map(tagId => ({ tagId }))
+        }
+      })
     }
 
     const { id } = await params
-    // 检查产品是否存在
-    const existing = await prisma.product.findUnique({
-      where: { id }
-    })
-
-    if (!existing) {
-      return NextResponse.json(
-        { error: "产品不存在" },
-        { status: 404 }
-      )
-    }
-
-    // 构建更新数据
-    const updateData: any = { ...body }
-
-    // 如果更新产品图片
-    if (body.productImages) {
-      updateData.ProductImage = {
-        deleteMany: {},
-        createMany: {
-          data: body.productImages.map(img => ({
-            imageUrl: img.url,
-            sortOrder: img.order,
-            description: img.description || ''
-          }))
-        }
-      }
-      delete updateData.productImages
-    }
-
-    console.log('更新数据:', updateData) // 添加日志
-
-    // 更新产品
     const product = await prisma.product.update({
       where: { id },
-      data: updateData,
-      include: {
-        brand: true,
-        productType: true,
-        channelType: true,
-        materialType: true,
-        ProductImage: true,
-        tags: {
-          include: {
-            tag: true
-          }
-        }
-      }
+      data: updateData
     })
 
-    return NextResponse.json({ success: true, data: product })
+    return NextResponse.json(product)
+
   } catch (error) {
-    console.error("更新产品失败:", error)
+    console.error("��新产品失败:", error)
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { 
-          error: "数据验证失败", 
-          details: error.errors.map(err => ({
-            path: err.path.join('.'),
-            message: err.message
-          }))
-        },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "数据验证失败", details: error.errors }, { status: 400 })
     }
-    return NextResponse.json(
-      { error: "更新产品失败: " + (error instanceof Error ? error.message : String(error)) },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "更新失败" }, { status: 500 })
   }
 }
 
@@ -193,9 +123,16 @@ export async function DELETE(
     }
 
     const { id } = await params
+    
     // 检查产品是否存在
     const existing = await prisma.product.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        ProductImage: true,  // 产品图片
+        ratings: true,       // 产品评分
+        reviews: true,       // 产品测评
+        tags: true,         // 产品标签
+      }
     })
 
     if (!existing) {
@@ -205,10 +142,49 @@ export async function DELETE(
       )
     }
 
-    // 删除产品
-    await prisma.product.delete({
-      where: { id }
+    // 开始事务处理
+    await prisma.$transaction(async (tx) => {
+      // 1. 删除产品评分
+      await tx.productRating.deleteMany({
+        where: { productId: id }
+      })
+
+      // 2. 删除产品评论(评测下的评论)
+      await tx.comment.deleteMany({
+        where: { 
+          review: {
+            productId: id
+          }
+        }
+      })
+
+      // 3. 删除产品评测
+      await tx.review.deleteMany({
+        where: { productId: id }
+      })
+
+      // 4. 删除产品标签关联
+      await tx.productTag.deleteMany({
+        where: { productId: id }
+      })
+
+      // 5. 删除产品图片
+      await tx.productImage.deleteMany({
+        where: { productId: id }
+      })
+
+      // 6. 最后删除产品本身
+      await tx.product.delete({
+        where: { id }
+      })
     })
+
+    // 删除 R2 中的文件夹
+    try {
+      await deleteR2Folder(`products/${id}`)
+    } catch (error) {
+      console.error(`删除产品文件夹失败: products/${id}`, error)
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

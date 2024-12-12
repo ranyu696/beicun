@@ -162,6 +162,12 @@ export function ProductList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                          <Link href={`/admin/products/${product.id}/media`}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            媒体
+                          </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/products/${product.id}/edit`}>
                             <Pencil className="h-4 w-4 mr-2" />

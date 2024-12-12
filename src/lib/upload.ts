@@ -1,25 +1,21 @@
 export const UPLOAD_DIRS = {
-  EDITOR: 'editor',
+  EDITOR: 'editor',//编辑器
   BRAND: {
-    LOGOS: 'brands/logos'
+    LOGOS: 'brands/logos'//品牌logo
   },
   UTILITY_TYPE: {
-    ICONS: 'utility-types/icons'
+    ICONS: 'utility-types/icons'//工具类型图标
   },
   PRODUCT: {
-    BASE: 'products',
-    MAIN: 'main',
-    SALES: 'sales',
-    DETAILS: 'details',
-    GALLERY: 'gallery',
-    VIDEOS: 'videos'
-  },
-  REVIEW: {
-    UNBOXING: 'reviews/unboxing',
-    CONTENT: 'reviews/content'
+    BASE: 'products',//产品
+    MAIN: 'main',//产品主图
+    SALES: 'sales',//销售图
+    DETAILS: 'details',//产品详情
+    GALLERY: 'gallery',//产品图库
+    VIDEOS: 'videos'//产品视频
   },
   USER: {
-    AVATARS: 'users/avatars'
+    AVATARS: 'users/avatars'//头像
   }
 } as const
 

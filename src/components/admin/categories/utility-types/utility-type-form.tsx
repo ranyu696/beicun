@@ -97,23 +97,28 @@ export function UtilityTypeForm({
   const onSubmit = async (data: UtilityTypeFormValues) => {
     try {
       setLoading(true)
-      if (initialData) {
-        await fetch(`/api/utility-types/${initialData.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        })
-      } else {
-        await fetch(`/api/utility-types`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        })
+      const response = initialData 
+        ? await fetch(`/api/categories/utility-types/${initialData.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          })
+        : await fetch(`/api/categories/utility-types`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          })
+
+      if (!response.ok) {
+        throw new Error('API请求失败')
       }
+
+      await response.json() // 确保响应正常
+
       router.refresh()
       router.push(`/admin/categories/utility-types`)
       toast({
@@ -121,6 +126,7 @@ export function UtilityTypeForm({
         description: toastMessage,
       })
     } catch (error) {
+      console.error('保存失败:', error)
       toast({
         title: "操作失败",
         description: "保存失败，请重试",
@@ -134,9 +140,14 @@ export function UtilityTypeForm({
   const onDelete = async () => {
     try {
       setLoading(true)
-      await fetch(`/api/utility-types/${initialData?.id}`, {
+      const response = await fetch(`/api/categories/utility-types/${initialData?.id}`, {
         method: 'DELETE',
       })
+
+      if (!response.ok) {
+        throw new Error('删除失败')
+      }
+
       router.refresh()
       router.push(`/admin/categories/utility-types`)
       toast({
@@ -144,6 +155,7 @@ export function UtilityTypeForm({
         description: "器具类型已删除",
       })
     } catch (error) {
+      console.error('删除失败:', error)
       toast({
         title: "删除失败",
         description: "删除失败，请重试",

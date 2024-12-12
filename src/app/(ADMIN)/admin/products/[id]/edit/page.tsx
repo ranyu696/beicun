@@ -1,122 +1,87 @@
 import { notFound } from 'next/navigation'
-import { ProductForm } from '@/components/admin/products/ProductForm'
+import { ProductEditForm } from '@/components/admin/products/ProductEditForm'
 import { prisma } from '@/lib/prisma'
-import { ProductModel } from '@/types/product'
-import { Product, ProductImage, ProductTag, Tag } from '@prisma/client'
+import { Heading } from '@/components/ui/heading'
+import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 type Params = Promise<{ id: string }>
 
-interface ProductWithRelations extends Product {
-  ProductImage: ProductImage[]
-  tags: (ProductTag & { tag: Tag })[]
-}
-
 export default async function EditProductPage({ params }: { params: Params }) {
   const { id } = await params
-  // 获取产品数据
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: {
-      ProductImage: {
-        orderBy: {
-          sortOrder: 'asc'
-        }
-      },
-      tags: {
-        include: {
-          tag: true
+
+  // 获取所有需要的数据
+  const [
+    product,
+    brands,
+    productTypes,
+    channelTypes,
+    materialTypes,
+    utilityTypes,
+    tags
+  ] = await Promise.all([
+    // 获取产品数据
+    prisma.product.findUnique({
+      where: { id },
+      include: {
+        tags: {
+          include: {
+            tag: true
+          }
         }
       }
-    }
-  }) as ProductWithRelations | null
+    }),
+    // 获取品牌列表
+    prisma.brand.findMany(),
+    // 获取产品类型列表
+    prisma.productType.findMany(),
+    // 获取通道类型列表
+    prisma.channelType.findMany(),
+    // 获取材料类型列表
+    prisma.materialType.findMany(),
+    // 获取用途类型列表
+    prisma.utilityType.findMany(),
+    // 获取标签列表
+    prisma.tag.findMany()
+  ])
 
   if (!product) {
     notFound()
   }
 
-  // 转换数据以匹配 ProductModel 接口
-  const transformedProduct: ProductModel = {
-    id: product.id,
-    name: product.name,
-    slug: product.slug,
-    price: product.price,
-    brandId: product.brandId,
-    productTypeId: product.productTypeId,
-    channelTypeId: product.channelTypeId,
-    materialTypeId: product.materialTypeId,
-    utilityTypeId: product.utilityTypeId,
-    description: product.description || undefined,
-    taobaoUrl: product.taobaoUrl || undefined,
-    registrationDate: product.registrationDate,
-    height: product.height,
-    width: product.width,
-    length: product.length,
-    channelLength: product.channelLength,
-    totalLength: product.totalLength,
-    weight: product.weight,
-    version: product.version,
-    isReversible: product.isReversible,
-    stimulation: product.stimulation,
-    softness: product.softness,
-    durability: product.durability,
-    tightness: product.tightness,
-    smell: product.smell,
-    oiliness: product.oiliness,
-    mainImage: product.mainImage,
-    salesImage: product.salesImage,
-    videoUrl: product.videoUrl || undefined,
-    detailImages: product.detailImages || [],
-    ProductImage: product.ProductImage.map((img: ProductImage) => ({
-      id: img.id,
-      imageUrl: img.imageUrl,
-      sortOrder: img.sortOrder
-    })),
-    tags: product.tags.map((productTag) => ({
-      id: `${productTag.productId}_${productTag.tagId}`, // 使用复合主键
-      tagId: productTag.tagId
-    }))
-  }
-
-  // 获取表单所需的选项数据
-  const [brands, productTypes, channelTypes, materialTypes, tags] = await Promise.all([
-    prisma.brand.findMany({
-      orderBy: { sortOrder: 'asc' }
-    }),
-    prisma.utilityType.findMany({
-      orderBy: { sortOrder: 'asc' }
-    }),
-    prisma.productType.findMany({
-      orderBy: { sortOrder: 'asc' }
-    }),
-    prisma.channelType.findMany({
-      orderBy: { sortOrder: 'asc' }
-    }),
-    prisma.materialType.findMany({
-      orderBy: { sortOrder: 'asc' }
-    }),
-    prisma.tag.findMany({
-      orderBy: { name: 'asc' }
-    })
-  ])
-
-  const formData = {
-    brands,
-    productTypes,
-    channelTypes,
-    materialTypes,
-    tags
-  }
-
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">编辑产品 - {product.name}</h1>
+    <div className="flex-col">
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/admin/products">
+              <Button
+                variant="ghost"
+                size="icon"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Heading
+              title="编辑产品"
+              description={`编辑 ${product.name} 的基本信息`}
+            />
+          </div>
+        </div>
+        <Separator />
+        
+        <ProductEditForm 
+          productData={product}
+          brands={brands}
+          productTypes={productTypes}
+          channelTypes={channelTypes}
+          materialTypes={materialTypes}
+          utilityTypes={utilityTypes}
+          tags={tags}
+        />
       </div>
-      
-      <ProductForm 
-        initialData={transformedProduct}
-        formData={formData}
-      />
     </div>
   )
 }
