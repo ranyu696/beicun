@@ -1,4 +1,5 @@
-import { ProductTabs } from "@/components/products/product-tabs"
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 
@@ -24,12 +25,30 @@ export default function ProductLayout({
       {/* 主要内容区域 */}
       <div className="space-y-6">
         {children}
-        <ProductTabs
-          contentTab={content}
-          specsTab={specs}
-          reviewsTab={reviews}
-          ratingsTab={ratings}
-        />
+      <Tabs defaultValue="content" className="space-y-4">
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="content">产品介绍</TabsTrigger>
+        <TabsTrigger value="specs">规格参数</TabsTrigger>
+        <TabsTrigger value="reviews">用户评测</TabsTrigger>
+        <TabsTrigger value="ratings">用户评分</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="content" className="space-y-4">
+        {content}
+      </TabsContent>
+
+      <TabsContent value="specs" className="space-y-4">
+        {specs}
+      </TabsContent>
+
+      <TabsContent value="reviews" className="space-y-4">
+        {reviews}
+      </TabsContent>
+
+      <TabsContent value="ratings" className="space-y-4">
+        {ratings}
+      </TabsContent>
+    </Tabs>
       </div>
 
       {/* 模态框 */}
