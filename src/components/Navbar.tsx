@@ -22,6 +22,7 @@ import { signOut, useSession } from "next-auth/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User, Settings,LogOut, ShieldCheck } from "lucide-react"
 import { UserRole } from "@prisma/client"
+import { SearchInput } from "@/components/search/search-input"
 
 const tutorials = [
   {
@@ -42,7 +43,7 @@ const tutorials = [
   {
     title: "常见问题",
     href: "/tutorials/faq",
-    description: "解答用户最常遇到的问题和疑���。"
+    description: "解答用户最常遇到的问题和疑。"
   }
 ]
 
@@ -107,7 +108,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Input type="search" placeholder="搜索名器..." className="w-64" />
+            <SearchInput className="w-64" />
             {session ? (
               <UserMenu />
             ) : (
@@ -190,7 +191,11 @@ export function Navbar() {
                       <div className="space-y-4">
                         <div className="flex items-center space-x-4 px-4">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={session.user.image || ''} />
+                            <AvatarImage 
+                              src={session.user.image || ''} 
+                              alt={session.user.name || 'User avatar'}
+                              sizes="32px"
+                            />
                             <AvatarFallback>
                               {session.user.name?.[0] || session.user.email?.[0] || 'U'}
                             </AvatarFallback>

@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import { FilterDialog } from "@/components/filter-dialog";
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { ReviewCard } from "@/components/review-card";
 import { BrandCard } from "@/components/brand-card";
 import { FilterSelect } from "@/components/ui/filter-select";
+import { HeroFilter } from "@/components/home/hero-filter";
 
 // 获取数据
 export default async function Home() {
@@ -92,56 +92,13 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section with Filter */}
-      <section className="relative bg-gradient-to-b from-gray-50 to-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div className="space-y-4">
-              <h2 className="text-4xl sm:text-5xl font-bold text-gray-800">探索杯村</h2>
-              <p className="text-xl text-gray-600">发现你的理想选择</p>
-            </div>
-
-            {/* 筛选区域 */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <FilterSelect
-                  label="品牌"
-                  options={brandOptions}
-                  placeholder="选择品牌"
-                />
-                 <FilterSelect
-                  label="类型"
-                  options={productTypes}
-                  placeholder="选择类型"
-                />
-                <FilterSelect
-                  label="器具"
-                  options={utilityTypes}
-                  placeholder="选择器具"
-                />
-                <FilterSelect
-                  label="材质"
-                  options={materialTypes}
-                  placeholder="选择材质"
-                />
-                <FilterSelect
-                  label="通道"
-                  options={channelTypes}
-                  placeholder="选择通道"
-                />
-              </div>
-              
-              <div className="flex justify-center gap-4">
-                <Button size="lg" variant="outline">
-                  重置
-                </Button>
-                <Button size="lg" className="min-w-[120px]">
-                  搜索
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroFilter
+        brands={brands}
+        productTypes={productTypes}
+        utilityTypes={utilityTypes}
+        materialTypes={materialTypes}
+        channelTypes={channelTypes}
+      />
 
       {/* Hot Products Section */}
       <section className="py-16">

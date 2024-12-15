@@ -21,12 +21,14 @@ export function ProductCard({ product }: ProductCardProps) {
     <Link href={`/products/${product.slug}`}>
       <Card className="hover:shadow-lg transition-shadow">
         <CardHeader className="p-0">
-          <div className="aspect-square relative">
+          <div className="relative aspect-[3/4]">
             <Image
               src={product.mainImage}
               alt={product.name}
               fill
-              className="object-cover rounded-t-lg"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover rounded-lg"
+              priority
             />
           </div>
         </CardHeader>
