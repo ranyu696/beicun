@@ -6,8 +6,8 @@ database:
   host: localhost
   port: 5432
   user: postgres
-  password: 100210
-  dbname: beicun
+  password: 2VokojxDE7t08gg
+  dbname: beicuncp
 
 redis:
   host: localhost
