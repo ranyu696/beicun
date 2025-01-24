@@ -45,13 +45,13 @@ func InitDB(cfg *config.Config) error {
 		Logger: newLogger,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to connect to database: %w", err)
+		return fmt.Errorf("无法连接到数据库: %w", err)
 	}
 
 	// 设置连接池
 	sqlDB, err := db.DB()
 	if err != nil {
-		return fmt.Errorf("failed to get sql.DB: %w", err)
+		return fmt.Errorf("无法获得sql.db: %w", err)
 	}
 
 	sqlDB.SetMaxIdleConns(10)
@@ -62,9 +62,11 @@ func InitDB(cfg *config.Config) error {
 
 	// 自动迁移
 	if err := autoMigrate(db); err != nil {
-		return fmt.Errorf("failed to auto migrate: %w", err)
+		return fmt.Errorf("自动迁移失败: %w", err)
 	}
-
+	if err := SeedData(db); err != nil {
+		return fmt.Errorf("无法播种数据: %w", err)
+	}
 	// 
 	Redis = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Redis.Host, cfg.Redis.Port),
@@ -78,7 +80,7 @@ func InitDB(cfg *config.Config) error {
 
 	// 
 	if err := Redis.Ping(ctx).Err(); err != nil {
-		return fmt.Errorf("failed to connect to redis: %w", err)
+		return fmt.Errorf("连接redis失败: %w", err)
 	}
 
 	log.Println("   ")
