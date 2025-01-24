@@ -5,6 +5,7 @@ import (
 	"beicun/back/handler"
 	"beicun/back/middleware"
 	"beicun/back/service"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -32,6 +33,15 @@ func SetupRouter(
 	cfg *config.Config,
 ) *gin.Engine {
 	r := gin.Default()
+
+	// 添加请求日志中间件
+	r.Use(func(c *gin.Context) {
+		log.Printf("收到请求: %s %s", c.Request.Method, c.Request.URL.Path)
+		c.Next()
+	})
+
+	// 配置静态文件服务
+	r.Static("/upload", "./storage/upload")
 
 	// 全局中间件
 	r.Use(middleware.CORSMiddleware())

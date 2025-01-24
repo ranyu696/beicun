@@ -102,8 +102,14 @@ func main() {
 	storageHandler := handler.NewStorageHandler(storageService, cfg) 
 	uploadHandler := handler.NewUploadHandler(uploadService, zap.L())
 
+	// 创建路由引擎
+	r := gin.Default()
+
+	// 配置静态文件服务
+	r.Static("/upload", "./storage/upload/")
+
 	// 设置路由
-	r := router.SetupRouter(
+	r = router.SetupRouter(
 		authHandler,
 		userHandler,
 		productHandler,
@@ -130,9 +136,6 @@ func main() {
 
 	// 配置前端文件服务
 	frontendDir := "./web/dist"
-
-	// 配置静态文件服务
-	r.Static("/storage", "./storage/upload")
 
 	if cfg.Server.Mode == "release" {
 		// 生产环境：服务打包后的静态文件
@@ -164,11 +167,6 @@ func main() {
 			// 排除 API 和 storage 路径
 			if strings.HasPrefix(c.Request.URL.Path, "/api/") {
 				c.JSON(http.StatusNotFound, gin.H{"error": "API not found"})
-				return
-			}
-
-			if strings.HasPrefix(c.Request.URL.Path, "/storage/") {
-				c.File(filepath.Join(".", c.Request.URL.Path))
 				return
 			}
 
