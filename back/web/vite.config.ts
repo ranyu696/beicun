@@ -49,7 +49,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: '../dist',
+    outDir: './dist',
     assetsDir: 'assets',
     assetsInlineLimit: 4096,
     cssCodeSplit: true,
