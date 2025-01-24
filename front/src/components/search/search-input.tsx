@@ -1,60 +1,80 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, History, X } from "lucide-react"
+import { Search, History, X, ChevronDown } from "lucide-react"
 import { 
   Command,
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useLocalStorage } from "@/hooks/use-local-storage"
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { cn } from "@/lib/utils"
 
 interface SearchInputProps {
   className?: string
 }
 
+type SearchType = 'all' | 'products' | 'reviews' | 'brands'
+
+const searchTypeLabels: Record<SearchType, string> = {
+  all: '全部',
+  products: '产品',
+  reviews: '测评',
+  brands: '品牌'
+}
+
 export function SearchInput({ className }: SearchInputProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [open, setOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [typeOpen, setTypeOpen] = useState(false)
   const [value, setValue] = useState("")
+  const [searchType, setSearchType] = useState<SearchType>('all')
   const debouncedValue = useDebounce(value, 300)
-  const [searchHistory, setSearchHistory] = useLocalStorage<string[]>("search-history", [])
+  const [searchHistory, setSearchHistory] = useLocalStorage<Array<{
+    term: string
+    type: SearchType
+  }>>("search-history", [])
 
   // 监听搜索参数变化
   useEffect(() => {
     const q = searchParams.get("q")
+    const type = searchParams.get("type") as SearchType
     if (q) {
       setValue(q)
+    }
+    if (type && Object.keys(searchTypeLabels).includes(type)) {
+      setSearchType(type)
     }
   }, [searchParams])
 
   // 处理搜索
-  const handleSearch = (term: string) => {
+  const handleSearch = (term: string, type: SearchType = searchType) => {
     if (!term.trim()) return
 
     // 更新搜索历史
     const newHistory = [
-      term,
-      ...searchHistory.filter(item => item !== term)
+      { term, type },
+      ...searchHistory.filter(item => item.term !== term)
     ].slice(0, 5)
     setSearchHistory(newHistory)
 
     // 执行搜索
     const params = new URLSearchParams(searchParams.toString())
     params.set("q", term)
+    params.set("type", type)
     params.delete("page")
     router.push(`/search?${params.toString()}`)
-    setOpen(false)
+    setSearchOpen(false)
   }
 
   // 清除搜索历史
@@ -64,92 +84,117 @@ export function SearchInput({ className }: SearchInputProps) {
 
   // 删除单个历史记录
   const removeHistoryItem = (term: string) => {
-    setSearchHistory(prev => prev.filter(item => item !== term))
+    setSearchHistory(prev => prev.filter(item => item.term !== term))
   }
 
   // 处理键盘事件
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && value) {
       e.preventDefault()
       handleSearch(value)
     }
   }
 
   return (
-    <>
-      <div className="relative">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="搜索名器..."
-          className={`pl-8 ${className}`}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onFocus={() => setOpen(true)}
-          onKeyDown={handleKeyDown}
-        />
-        {value && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute right-1 top-1 h-7 w-7 px-0"
-            onClick={() => {
-              setValue("")
-              const params = new URLSearchParams(searchParams.toString())
-              params.delete("q")
-              router.push(`/search?${params.toString()}`)
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <Popover open={typeOpen} onOpenChange={setTypeOpen}>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              role="combobox" 
+              aria-expanded={typeOpen}
+              className="w-[120px] justify-between"
+            >
+              {searchTypeLabels[searchType]}
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[120px] p-0">
+          <Command>
+  <CommandList key="search-type-list">
+    <CommandGroup key="search-type-group">
+      {Object.entries(searchTypeLabels).map(([type, label], index) => (
+        <CommandItem
+          key={`search-type-${type}-${index}`}
+          onSelect={() => {
+            setSearchType(type as SearchType)
+            setTypeOpen(false)
+            if (debouncedValue) {
+              handleSearch(debouncedValue, type as SearchType)
+            }
+          }}
+          className="justify-between"
+        >
+          {label}
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  </CommandList>
+</Command>
+          </PopoverContent>
+        </Popover>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput 
-          placeholder="搜索名器..." 
-          value={value}
-          onValueChange={setValue}
-          onKeyDown={handleKeyDown}
-          aria-labelledby="search-dialog-title"
-        />
-        
-        <CommandList>
-          <CommandEmpty>未找到相关结果</CommandEmpty>
-          {searchHistory.length > 0 && (
-            <CommandGroup heading="搜索历史">
-              {searchHistory.map((term) => (
-                <CommandItem
-                  key={term}
-                  onSelect={() => handleSearch(term)}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center">
-                    <History className="mr-2 h-4 w-4" />
-                    {term}
-                  </div>
+        <div className="relative flex-1">
+          <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+            <PopoverTrigger asChild>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={`搜索${searchTypeLabels[searchType]}...`}
+                  className={cn("pl-8", className)}
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                {value && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removeHistoryItem(term)
+                    className="absolute right-1 top-1 h-7 w-7 px-0"
+                    onClick={() => {
+                      setValue("")
+                      const params = new URLSearchParams(searchParams.toString())
+                      params.delete("q")
+                      router.push(`/search?${params.toString()}`)
                     }}
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                </CommandItem>
-              ))}
-              <CommandItem 
-                onSelect={clearHistory}
-                className="justify-center text-muted-foreground"
-              >
-                清除搜索历史
-              </CommandItem>
-            </CommandGroup>
-          )}
-        </CommandList>
-      </CommandDialog>
-    </>
+                )}
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="p-0" align="start">
+            <Command>
+  <CommandList key="search-history-list">
+    <CommandEmpty key="empty-state">未找到相关结果</CommandEmpty>
+    {searchHistory.length > 0 && (
+      <CommandGroup key="history-group" heading="搜索历史">
+        {searchHistory.map(({ term, type }, index) => (
+          <CommandItem
+            key={`history-${term}-${index}`}
+            onSelect={() => handleSearch(term, type)}
+            className="flex items-center justify-between"
+          >
+            {/* ... rest of the content ... */}
+          </CommandItem>
+        ))}
+        <CommandSeparator key="history-separator" />
+        <CommandItem 
+          key="clear-history-action"
+          onSelect={clearHistory}
+          className="justify-center text-muted-foreground"
+        >
+          清除搜索历史
+        </CommandItem>
+      </CommandGroup>
+    )}
+  </CommandList>
+</Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+    </div>
   )
-} 
+}

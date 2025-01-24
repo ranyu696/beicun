@@ -7,12 +7,13 @@ import { ThumbsUp, ThumbsDown } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default async function ReviewPage({ params }: Props) {
+export default async function ReviewPage(props: Props) {
+  const params = await props.params
   const review = await getReviewBySlug(params.slug)
   
   if (!review) return null

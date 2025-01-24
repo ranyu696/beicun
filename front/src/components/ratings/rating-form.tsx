@@ -8,13 +8,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { auth } from "@/lib/auth"
+import { Rating } from "@/types/rating"
 
 interface RatingFormProps {
   productId: string
+  currentUser?: {
+    id: string
+    name: string
+    avatar: string
+  }
   onSuccess?: () => void
 }
 
-export function RatingForm({ productId, onSuccess }: RatingFormProps) {
+export function RatingForm({ productId, currentUser, onSuccess }: RatingFormProps) {
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
   const [reason, setReason] = useState("")

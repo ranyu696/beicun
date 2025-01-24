@@ -15,11 +15,9 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 
-interface RegisterFormProps {
-  modal?: boolean
-}
 
-export function RegisterForm({ modal }: RegisterFormProps) {
+
+export function RegisterForm({  }) {
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
   const [password, setPassword] = useState("")
@@ -157,9 +155,6 @@ export function RegisterForm({ modal }: RegisterFormProps) {
         description: "欢迎加入杯村！",
       })
 
-      if (!modal) {
-        router.push('/dashboard')
-      }
     } catch (error: any) {
       const errorMessage = error.message || "注册失败"
       

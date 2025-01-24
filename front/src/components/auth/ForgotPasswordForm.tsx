@@ -8,11 +8,9 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { Turnstile } from '@marsidev/react-turnstile'
 
-interface ForgotPasswordFormProps {
-  modal?: boolean
-}
 
-export function ForgotPasswordForm({ modal }: ForgotPasswordFormProps) {
+
+export function ForgotPasswordForm({ }) {
   const [email, setEmail] = useState("")
   const [turnstileToken, setTurnstileToken] = useState("")
   const [loading, setLoading] = useState(false)
@@ -56,9 +54,6 @@ export function ForgotPasswordForm({ modal }: ForgotPasswordFormProps) {
         description: "请查看您的邮箱，点击链接重置密码"
       })
 
-      if (!modal) {
-        router.push("/auth/login")
-      }
     } catch (error: any) {
       const errorMessage = error.message || "发送重置邮件失败"
       

@@ -27,6 +27,7 @@ export function BrandCard({ brand }: BrandProps) {
                 alt={brand.name} 
                 width={80}
                 height={80}
+                priority
                 className="w-20 h-20 object-contain"
               />
             ) : (

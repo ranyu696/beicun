@@ -136,3 +136,23 @@ export function useAuth() {
   }
   return context
 }
+
+export async function auth() {
+  const accessToken = localStorage.getItem('accessToken')
+  const storedUser = localStorage.getItem('user')
+  
+  if (!accessToken || !storedUser) {
+    return null
+  }
+
+  try {
+    const user = JSON.parse(storedUser)
+    return { 
+      accessToken,
+      user 
+    }
+  } catch (error) {
+    console.error('Error parsing stored user:', error)
+    return null
+  }
+}

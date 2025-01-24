@@ -8,14 +8,17 @@ import { zhCN } from "date-fns/locale"
 import { Star, MessageSquare, Eye } from "lucide-react"
 import { cn, getImageUrl } from "@/lib/utils"
 import { ReviewStatus } from "@/types/review"
+import { Suspense } from "react"
 
 interface Props {
-  searchParams: {
+  searchParams: Promise<{
     page?: string
-  }
+  }>
 }
 
-export default async function ReviewsPage({ searchParams }: Props) {
+export default async function ReviewsPage(props: Props) {
+  // 等待 searchParams 解析完成
+  const searchParams = await props.searchParams
   const page = Number(searchParams.page) || 1
   const pageSize = 10
 
@@ -129,7 +132,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
           </div>
         )}
       </div>
-
+      <Suspense fallback={<div className="h-14" />}>
       {/* 分页 */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-8">
@@ -167,6 +170,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
           </Link>
         </div>
       )}
+      </Suspense>
     </div>
   )
 }

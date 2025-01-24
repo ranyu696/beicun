@@ -9,11 +9,9 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/lib/auth"
 import { Turnstile } from '@marsidev/react-turnstile'
 
-interface LoginFormProps {
-  modal?: boolean
-}
 
-export function LoginForm({ modal }: LoginFormProps) {
+
+export function LoginForm({  }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [turnstileToken, setTurnstileToken] = useState("")
@@ -42,10 +40,6 @@ export function LoginForm({ modal }: LoginFormProps) {
         password,
         turnstileToken,
       })
-      
-      if (!modal) {
-        router.push('/')
-      }
       
       toast({
         title: "登录成功",

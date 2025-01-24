@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
-import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import { ProductCard } from "@/components/product-card"
 import { getProducts } from "@/app/actions/products"
 import { ProductStatus } from "@/types/product"
+import { Button } from "@/components/ui/button"
+import { Package } from "lucide-react"
 
 export const metadata: Metadata = {
   title: '产品列表 - 杯村测评',
@@ -32,12 +33,6 @@ export default async function ProductsPage() {
 
     const products = response.list || []
 
-    if (products.length === 0) {
-      console.log('未找到产品，返回 404')
-      notFound()
-    }
-
-    console.log('开始渲染产品列表页面')
     return (
       <div className="container mx-auto px-4 py-6 lg:py-8">
         <div className="max-w-7xl mx-auto">
@@ -48,26 +43,35 @@ export default async function ProductsPage() {
             </Badge>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {products.map((product) => (
-              <ProductCard 
-                key={product.id} 
-                product={product}
-              />
-            ))}
-          </div>
+          {products.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <Card className="text-center py-12">
+              <CardContent>
+                <div className="flex flex-col items-center gap-4">
+                  <Package className="w-12 h-12 text-muted-foreground" />
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">暂无产品</h3>
+                    <p className="text-muted-foreground">
+                      我们正在努力添加更多产品，请稍后再来查看
+                    </p>
+                  </div>
+                  <Button variant="outline" asChild>
+                    <Link href="/">返回首页</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     )
   } catch (error) {
-    console.error('获取产品列表失败:', {
-      error: error instanceof Error ? {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      } : error,
-      timestamp: new Date().toISOString()
-    })
-    notFound()
+    console.error('获取产品列表失败:', error)
+    throw error
   }
 }

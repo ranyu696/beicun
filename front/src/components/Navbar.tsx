@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Menu, Search, X } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useState } from "react"
@@ -23,6 +22,7 @@ import { User, Settings, LogOut, ShieldCheck } from "lucide-react"
 import { UserRole } from "@/types/user"
 import { SearchInput } from "@/components/search/search-input"
 import { useAuth } from "@/lib/auth"
+import router from 'next/router'
 
 const tutorials = [
   {
@@ -51,15 +51,13 @@ export function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const { user, logout } = useAuth()
 
-  console.log('Navbar 渲染，用户状态:', user)
-
   // 登出处理函数
   const handleLogout = async () => {
     try {
       console.log('开始登出...')
       await logout()
       console.log('登出成功')
-      window.location.href = '/'
+      router.push('/')
     } catch (error) {
       console.error('登出失败:', error)
     }
@@ -122,7 +120,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <SearchInput className="w-64" />
+            <SearchInput key="search-input" className="w-64" />
             {user ? (
               <UserMenu />
             ) : (
@@ -275,7 +273,7 @@ export function Navbar() {
         {/* 移动端搜索栏 */}
         {isSearchOpen && (
           <div className="md:hidden absolute left-0 right-0 top-16 p-4 bg-white shadow-lg border-t">
-            <SearchInput className="w-full" />
+            <SearchInput key="search-input-mobile" className="w-full" />
           </div>
         )}
       </div>

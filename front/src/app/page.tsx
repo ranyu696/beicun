@@ -27,11 +27,20 @@ async function HotProducts() {
             查看更多
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {products.list.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {(!products?.list || products.list.length === 0) ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">暂无热门产品</p>
+            <Link href="/products" className="mt-4 inline-block">
+              <Button variant="outline">浏览所有产品</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {products.list.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
@@ -43,7 +52,7 @@ async function LatestReviews() {
     pageSize: 3,
     status: ReviewStatus.PUBLISHED
   })
-  console.log('最新测评', reviews)
+  
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -53,11 +62,20 @@ async function LatestReviews() {
             查看更多
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
-        </div>
+        {(!reviews || reviews.length === 0) ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">暂无评测内容</p>
+            <Link href="/reviews" className="mt-4 inline-block">
+              <Button variant="outline">浏览所有评测</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {reviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
@@ -80,11 +98,20 @@ async function BrandShowcase() {
             查看更多
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {brands.list.map((brand) => (
-            <BrandCard key={brand.id} brand={brand} />
-          ))}
-        </div>
+        {(!brands?.list || brands.list.length === 0) ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">暂无品牌展示</p>
+            <Link href="/brands" className="mt-4 inline-block">
+              <Button variant="outline">浏览所有品牌</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {brands.list.map((brand) => (
+              <BrandCard key={brand.id} brand={brand} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

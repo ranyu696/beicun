@@ -7,10 +7,6 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'img.beicunceping.com',
       },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      },
     ],
   },
 };

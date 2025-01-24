@@ -8,14 +8,15 @@ import { ProductVideoPlayer } from "@/components/products/product-video-player"
 import { Level } from "@/types/product"
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 // 动态生成元数据
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+export async function generateMetadata(props: ProductPageProps): Promise<Metadata> {
   try {
+    const params = await props.params
     const product = await getProductBySlug(params.slug)
     return {
       title: `${product.name} - 杯村测评`,
@@ -32,8 +33,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 // 设置重新验证时间
 export const revalidate = 60 // 每分钟重新验证一次
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage(props: ProductPageProps) {
   try {
+    const params = await props.params
     console.log('开始获取产品详情...', { slug: params.slug })
     
     const product = await getProductBySlug(params.slug)
@@ -125,6 +127,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </article>
     )
   } catch (error) {
+    const params = await props.params
     console.error('获取产品详情失败:', {
       error: error instanceof Error ? {
         name: error.name,

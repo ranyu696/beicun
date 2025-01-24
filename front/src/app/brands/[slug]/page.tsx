@@ -5,13 +5,14 @@ import { Product } from "@/types/product"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 
-interface Props {
-  params: {
-    slug: string
-  }
+type PageProps = {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function BrandPage({ params }: Props) {
+export default async function BrandPage(props: PageProps) {
+  const params = await props.params
+  const searchParams = await props.searchParams
   const { slug } = params
 
   // 并行获取品牌信息和产品列表

@@ -1,5 +1,6 @@
 import { RegisterForm } from "@/components/auth/RegisterForm"
 import { Metadata } from "next"
+import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: '注册 - 杯村测评',
@@ -16,7 +17,9 @@ export default function RegisterPage() {
             注册新账号开始探索
           </p>
         </div>
+        <Suspense fallback={<div>加载中...</div>}>
         <RegisterForm />
+        </Suspense>
       </div>
     </div>
   )

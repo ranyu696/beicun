@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { LoginForm } from "@/components/auth/LoginForm"
 import { Metadata } from "next"
 
@@ -16,7 +17,9 @@ export default function LoginPage() {
             输入您的邮箱和密码登录
           </p>
         </div>
-        <LoginForm />
+        <Suspense fallback={<div>加载中...</div>}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   )

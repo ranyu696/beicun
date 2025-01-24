@@ -5,8 +5,10 @@ import { useState, useEffect } from 'react'
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
   // 获取初始值
   const getInitialValue = (): T => {
+    if (typeof window === 'undefined') return initialValue
+    
     try {
-      const item = localStorage.getItem(key)
+      const item = window.localStorage.getItem(key)
       return item ? JSON.parse(item) : initialValue
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error)

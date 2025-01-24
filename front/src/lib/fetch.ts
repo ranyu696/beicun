@@ -1,7 +1,6 @@
 'use server'
 
 import { unstable_cache } from 'next/cache'
-import { headers } from 'next/headers'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 

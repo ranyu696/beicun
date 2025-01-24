@@ -44,7 +44,7 @@ export default async function ReviewsPage({ params }: ReviewsPageProps) {
               >
                 <div className="flex items-start gap-4">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={review.author?.image || ''} alt={review.author?.name || ''} />
+                    <AvatarImage src={review.author?.avatar || ''} alt={review.author?.name || ''} />
                     <AvatarFallback>
                       {review.author?.name?.[0] || '?'}
                     </AvatarFallback>
@@ -55,7 +55,7 @@ export default async function ReviewsPage({ params }: ReviewsPageProps) {
                         {review.author?.name}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(review.publishedAt), {
+                        {formatDistanceToNow(new Date(review.publishedAt || review.createdAt), {
                           addSuffix: true,
                           locale: zhCN
                         })}

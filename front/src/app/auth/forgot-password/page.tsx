@@ -1,5 +1,6 @@
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm"
 import { Metadata } from "next"
+import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: '忘记密码 - 杯村测评',
@@ -16,7 +17,9 @@ export default function ForgotPasswordPage() {
             输入您的邮箱，我们将发送重置密码链接
           </p>
         </div>
+        <Suspense fallback={<div>加载中...</div>}>
         <ForgotPasswordForm />
+        </Suspense>
       </div>
     </div>
   )

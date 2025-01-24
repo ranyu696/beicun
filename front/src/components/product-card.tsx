@@ -38,9 +38,10 @@ export function ProductCard({ product }: ProductCardProps) {
                 alt={product.name}
                 width={defaultImage.width}
                 height={defaultImage.height}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover rounded-lg"
+                className="object-cover"
+                fill
                 priority
+                sizes="(max-width: 768px) 100vw, 25vw"
               />
             </div>
           </CardHeader>
