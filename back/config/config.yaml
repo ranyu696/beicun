@@ -1,0 +1,64 @@
+server:
+  port: 8080
+  mode: release  # debug or release
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: 100210
+  dbname: beicun
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 0
+email:
+  host: "mail.spacemail.com"
+  port: 465
+  user: "email@beicunceping.com"
+  password: "5b14a6F9-B140-43ec-Ba73-24ab255b3518"
+  from: "email@beicunceping.com"
+jwt:
+  secret: your-secret-key
+  refreshSecret: your-refresh-secret-key
+  expirationDays: 7
+  refreshExpirationDays: 30
+  issuer: beicun
+
+turnstile:
+  siteKey: "0x4AAAAAAA5xBJ2fVDTcanOC"
+  secretKey: "0x4AAAAAAA5xBPFFtTrW_KuATXO5pB8im1A"
+  verifyURL: "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
+rateLimit:
+  period: 1h
+  limit: 1000
+
+storage:
+  path: storage         # 存储根路径
+  uploadDir: upload     # 上传目录
+  tempDir: temp         # 临时文件目录
+  mergeDir: merge      # 合并文件目录
+  baseUrl: http://localhost:8080/storage      # 访问基础URL
+  maxImageSize: 10485760  # 图片最大大小10mb（字节）
+  maxVideoSize: 10737418240  # 视频最大大小10gb（字节）
+  chunkSize: 5242880  # 默认分片大小5mb（字节）
+  maxFileSize: 10737418240  # 最大文件大小10gb（字节）
+  concurrency: 3         # 上传并发数
+  allowedTypes:
+    - .jpg
+    - .jpeg
+    - .png
+    - .gif
+    - .webp
+    - .mp4
+    - .avi
+    - .mov
+    - .wmv
+    - .pdf
+    - .doc
+    - .docx
+    - .xls
+    - .xlsx
