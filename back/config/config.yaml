@@ -14,6 +14,7 @@ redis:
   port: 6379
   password: ""
   db: 0
+  
 email:
   host: "mail.spacemail.com"
   port: 465

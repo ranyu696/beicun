@@ -17,5 +17,5 @@ export function getStorageUrl(path: string | undefined | null): string {
   }
   
   // 添加 /storage 前缀
-  return path.startsWith('/') ? `/storage${path}` : `/storage/${path}`
+  return path.startsWith('/') ? `${path}` : `/${path}`
 }
