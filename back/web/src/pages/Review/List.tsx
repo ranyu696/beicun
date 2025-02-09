@@ -91,8 +91,8 @@ export default function ReviewList() {
     },
     onSuccess: (_, variables) => {
       const statusText = 
-        variables.status === 'APPROVED' ? '已通过' :
-        variables.status === 'REJECTED' ? '已拒绝' : '待审核'
+        variables.status === 'PUBLISHED' ? '已发布' :
+        variables.status === 'PENDING' ? '已下架' : '草稿'
       toast({ 
         title: '状态更新成功', 
         description: `评测状态已更新为${statusText}` 
@@ -186,18 +186,18 @@ export default function ReviewList() {
                 <TableCell>
                   <Badge
                     variant={
-                      review.status === 'APPROVED'
+                      review.status === 'PUBLISHED'
                         ? 'default'
                         : review.status === 'PENDING'
                         ? 'secondary'
                         : 'destructive'
                     }
                   >
-                    {review.status === 'APPROVED'
-                      ? '已通过'
+                    {review.status === 'PUBLISHED'
+                      ? '已发布'
                       : review.status === 'PENDING'
-                      ? '待审核'
-                      : '已拒绝'}
+                      ? '已下架'
+                      : '草稿'}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -234,25 +234,51 @@ export default function ReviewList() {
                             onClick={() =>
                               updateReviewStatusMutation.mutate({
                                 id: review.id,
-                                status: 'APPROVED',
+                                status: 'PUBLISHED',
                               })
                             }
                             className="text-green-600"
                           >
-                            通过
+                            发布
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
                               updateReviewStatusMutation.mutate({
                                 id: review.id,
-                                status: 'REJECTED',
+                                status: 'ARCHIVED',
                               })
                             }
                             className="text-red-600"
                           >
-                            拒绝
+                            草稿
                           </DropdownMenuItem>
                         </>
+                      )}
+                      {review.status === 'PUBLISHED' && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            updateReviewStatusMutation.mutate({
+                              id: review.id,
+                              status: 'PENDING',
+                            })
+                          }
+                          className="text-red-600"
+                        >
+                          下架
+                        </DropdownMenuItem>
+                      )}
+                      {review.status === 'ARCHIVED' && (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            updateReviewStatusMutation.mutate({
+                              id: review.id,
+                              status: 'PUBLISHED',
+                            })
+                          }
+                          className="text-green-600"
+                        >
+                          发布
+                        </DropdownMenuItem>
                       )}
                       <DropdownMenuItem
                         className="text-red-600"

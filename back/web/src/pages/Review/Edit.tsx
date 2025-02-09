@@ -29,7 +29,7 @@ const formSchema = z.object({
   pros: z.array(z.string()),
   cons: z.array(z.string()),
   conclusion: z.string().min(1, '总结不能为空'),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED']),
+  status: z.enum(['PENDING', 'PUBLISHED', 'ARCHIVED']),
   cover: z.string(),
 })
 
@@ -57,7 +57,7 @@ export default function ReviewEdit() {
       pros: [''],
       cons: [''],
       conclusion: '',
-      status: 'PENDING',
+      status: 'ARCHIVED',
       cover: '',
     },
   })
@@ -75,7 +75,7 @@ export default function ReviewEdit() {
           pros: review.pros?.length > 0 ? review.pros : [''],
           cons: review.cons?.length > 0 ? review.cons : [''],
           conclusion: review.conclusion || '',
-          status: review.status || 'PENDING',
+          status: review.status || 'ARCHIVED',
           cover: review.cover || '',
         })
       }, 0)
@@ -336,9 +336,9 @@ export default function ReviewEdit() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="PENDING">待审核</SelectItem>
-                    <SelectItem value="APPROVED">已通过</SelectItem>
-                    <SelectItem value="REJECTED">已拒绝</SelectItem>
+                    <SelectItem value="PUBLISHED">已发布</SelectItem>
+                    <SelectItem value="PENDING">已下架</SelectItem>
+                    <SelectItem value="ARCHIVED">草稿</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

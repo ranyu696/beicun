@@ -21,6 +21,15 @@ import {
   flexRender,
 } from '@tanstack/react-table'
 import { columns } from './columns'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 
 interface TypeConfig {
   title: string
@@ -59,12 +68,16 @@ export default function TypeList({ type }: TypeListProps) {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [keyword, setKeyword] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 10
   const currentType = typeConfigs[type]
 
   const { data: types, isLoading } = useQuery({
-    queryKey: ['types', type, keyword],
-    queryFn: () => currentType.api.getTypes({ keyword }),
+    queryKey: ['types', type, keyword, currentPage],
+    queryFn: () => currentType.api.getTypes({ keyword, page: currentPage, pageSize }),
   })
+
+  const totalPages = Math.ceil((types?.data?.total || 0) / pageSize)
 
   const { mutate: deleteType } = useMutation({
     mutationFn: (id: string) => currentType.api.deleteType(id),
@@ -85,6 +98,10 @@ export default function TypeList({ type }: TypeListProps) {
 
   const handleEdit = (id: string) => {
     navigate(`${currentType.path}/edit/${id}`)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
   }
 
   const table = useReactTable({
@@ -173,6 +190,55 @@ export default function TypeList({ type }: TypeListProps) {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                  className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {[...Array(totalPages)].map((_, index) => {
+                const page = index + 1
+                // Show first page, last page, and pages around current page
+                if (
+                  page === 1 ||
+                  page === totalPages ||
+                  (page >= currentPage - 2 && page <= currentPage + 2)
+                ) {
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => handlePageChange(page)}
+                        isActive={currentPage === page}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                } else if (
+                  page === currentPage - 3 ||
+                  page === currentPage + 3
+                ) {
+                  return <PaginationEllipsis key={page} />
+                }
+                return null
+              })}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                  className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   )
 }

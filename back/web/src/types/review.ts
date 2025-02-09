@@ -3,7 +3,7 @@ import { User } from "./user";
 import { Comment } from "./comment";
 
 // 测评相关类型
-export type ReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type ReviewStatus = 'PENDING' | 'PUBLISHED' | 'ARCHIVED';
 
 export interface CreateReviewRequest {
   title: string;

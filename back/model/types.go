@@ -23,8 +23,8 @@ const (
 type ReviewStatus string
 
 const (
-	ReviewStatusPending   ReviewStatus = "PENDING"   // 已下架
-	ReviewStatusPublished ReviewStatus = "PUBLISHED" // 已发布
+	ReviewStatusPending   ReviewStatus = "PENDING"   // 下架
+	ReviewStatusPublished ReviewStatus = "PUBLISHED" // 发布
 	ReviewStatusArchived  ReviewStatus = "ARCHIVED"  // 草稿
 )
 
