@@ -110,18 +110,18 @@ export default function ReviewDetail() {
             </div>
             <Badge
               variant={
-                reviewData.status === 'PENDING'
-                  ? 'secondary'
-                  : reviewData.status === 'APPROVED'
+                reviewData.status === 'PUBLISHED'
                   ? 'default'
+                  : reviewData.status === 'PENDING'
+                  ? 'secondary'
                   : 'destructive'
               }
             >
-              {reviewData.status === 'PENDING'
-                ? '待审核'
-                : reviewData.status === 'APPROVED'
-                ? '已通过'
-                : '已拒绝'}
+              {reviewData.status === 'PUBLISHED'
+                ? '已发布'
+                : reviewData.status === 'PENDING'
+                ? '已下架'
+                : '草稿'}
             </Badge>
           </div>
         </CardHeader>
@@ -186,15 +186,24 @@ export default function ReviewDetail() {
           )}
         </CardContent>
         <CardFooter className="flex justify-end space-x-4">
-          {reviewData.status === 'PENDING' && (
+          {reviewData.status === 'ARCHIVED' && (
+            <div className="flex justify-end space-x-4">
+              <Button onClick={() => updateStatus('PUBLISHED')}>发布</Button>
+            </div>
+          )}
+          {reviewData.status === 'PUBLISHED' && (
             <div className="flex justify-end space-x-4">
               <Button
                 variant="destructive"
-                onClick={() => updateStatus('REJECTED')}
+                onClick={() => updateStatus('PENDING')}
               >
-                拒绝
+                下架
               </Button>
-              <Button onClick={() => updateStatus('APPROVED')}>通过</Button>
+            </div>
+          )}
+          {reviewData.status === 'PENDING' && (
+            <div className="flex justify-end space-x-4">
+              <Button onClick={() => updateStatus('PUBLISHED')}>重新发布</Button>
             </div>
           )}
         </CardFooter>
